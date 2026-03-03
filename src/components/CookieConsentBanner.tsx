@@ -31,8 +31,8 @@ export default function CookieConsentBanner() {
     <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-neutral-200 p-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-50 md:p-6 animate-in slide-in-from-bottom duration-500">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
         <div className="flex items-start gap-4">
-          <div className="p-2 bg-[#E8794A]/10 rounded-lg hidden md:block">
-            <Cookie className="w-6 h-6 text-[#E8794A]" />
+          <div className="p-2 bg-blue-600/10 rounded-lg hidden md:block">
+            <Cookie className="w-6 h-6 text-blue-600" />
           </div>
           <div>
             <h3 className="font-semibold text-neutral-900 mb-1">Nous respectons votre vie privée</h3>
@@ -51,7 +51,7 @@ export default function CookieConsentBanner() {
           </button>
           <button 
             onClick={handleAccept}
-            className="flex-1 md:flex-none px-4 py-2 bg-[#E8794A] text-white rounded-lg text-sm font-medium hover:bg-[#d66a3d] transition-colors"
+            className="flex-1 md:flex-none px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
           >
             Accepter tout
           </button>

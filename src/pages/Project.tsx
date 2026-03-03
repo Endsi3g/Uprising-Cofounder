@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import Draggable from "react-draggable";
 import Markdown from "react-markdown";
 import { ArrowUp, Maximize2, Edit3, List, Share, Download, MessageSquare, Search, Plus, Home as HomeIcon, Menu, X, Trash2, Send, Check, Crown, Grip, LayoutGrid, Lock, Globe, Keyboard, Gift, Loader2 } from "lucide-react";
-import { analyzeIdea, chatWithCofounder, generatePitchDeck } from "../lib/gemini";
+import { analyzeIdea, chatWithCofounder, generatePitchDeck, generateMarketAnalysis } from "../lib/gemini";
 import { useAuth } from "../contexts/AuthContext";
 import { useToast } from "../contexts/ToastContext";
 import { useKeyboardShortcuts } from "../hooks/useKeyboardShortcuts";
@@ -85,7 +85,7 @@ const DraggableCard = memo(({
   const isTask = card.title.toLowerCase().startsWith('tâche') || card.title.toLowerCase().startsWith('task');
 
   const cardContent = (
-    <div className={`bg-white rounded-xl border ${isTask ? 'border-orange-400 shadow-[0_4px_20px_rgba(249,115,22,0.15)]' : 'border-neutral-200 shadow-[0_4px_20px_rgba(0,0,0,0.08)]'} p-5 transition-all duration-200 ease-out ${isMaximized ? 'w-[600px] max-w-[95vw] h-[80vh] overflow-y-auto flex flex-col' : 'w-[280px] max-w-[85vw] hover:border-neutral-300'}`} style={{ willChange: 'transform, opacity' }}>
+    <div className={`bg-white rounded-xl border ${isTask ? 'border-blue-400 shadow-[0_4px_20px_rgba(37,99,235,0.15)]' : 'border-neutral-200 shadow-[0_4px_20px_rgba(0,0,0,0.08)]'} p-5 transition-all duration-200 ease-out ${isMaximized ? 'w-[600px] max-w-[95vw] h-[80vh] overflow-y-auto flex flex-col' : 'w-[280px] max-w-[85vw] hover:border-neutral-300'}`} style={{ willChange: 'transform, opacity' }}>
       <div className="flex justify-between items-start mb-3">
         {isEditing ? (
           <input 
@@ -96,18 +96,18 @@ const DraggableCard = memo(({
             autoFocus
           />
         ) : (
-          <h3 className={`font-semibold text-sm leading-tight ${isTask ? 'text-orange-600' : 'text-neutral-800'}`}>{card.title}</h3>
+          <h3 className={`font-semibold text-sm leading-tight ${isTask ? 'text-blue-600' : 'text-neutral-800'}`}>{card.title}</h3>
         )}
         <div className="flex gap-2 no-drag items-center">
           <div className="drag-handle cursor-grab active:cursor-grabbing text-neutral-300 hover:text-neutral-500 p-1 -m-1">
             <Grip className="w-3 h-3" />
           </div>
           <Send 
-            className="w-3 h-3 text-neutral-400 cursor-pointer hover:text-blue-500 transition-colors" 
+            className="w-3 h-3 text-neutral-400 cursor-pointer hover:text-blue-600 transition-colors" 
             onClick={(e) => { e.stopPropagation(); onSendToChat(`Référence à la carte "${card.title}":\n${card.content}`); }}
           />
           <MessageSquare 
-            className={`w-3 h-3 cursor-pointer transition-colors ${showComments ? 'text-blue-500' : 'text-neutral-400 hover:text-neutral-600'}`} 
+            className={`w-3 h-3 cursor-pointer transition-colors ${showComments ? 'text-blue-600' : 'text-neutral-400 hover:text-neutral-600'}`} 
             onClick={(e) => { e.stopPropagation(); setShowComments(!showComments); }}
           />
           {user && (
@@ -138,7 +138,7 @@ const DraggableCard = memo(({
           </a>
         ) : card.content === "Génération en cours..." ? (
           <div className="flex flex-col items-center justify-center py-6 text-neutral-400 gap-3">
-            <Loader2 className="w-6 h-6 animate-spin text-amber-500" />
+            <Loader2 className="w-6 h-6 animate-spin text-blue-500" />
             <span className="text-sm font-medium animate-pulse">Génération en cours...</span>
           </div>
         ) : (
@@ -171,7 +171,7 @@ const DraggableCard = memo(({
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
               placeholder="Ajouter un commentaire..."
-              className="flex-1 text-xs border border-neutral-200 rounded-md px-2 py-1.5 focus:outline-none focus:border-blue-400"
+              className="flex-1 text-xs border border-neutral-200 rounded-md px-2 py-1.5 focus:outline-none focus:border-blue-600"
             />
             <button 
               type="submit"
@@ -477,6 +477,50 @@ export default function Project() {
       
     } catch (error) {
       console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGenerateMarketAnalysis = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/projects/${id}/cards`, {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ 
+          title: "Analyse de Marché", 
+          content: "Génération en cours...", 
+          position_x: 100, 
+          position_y: 100 
+        }),
+      });
+      const cardData = await res.json();
+      setCards(prev => [...prev, cardData]);
+      
+      // Call Gemini to generate Market Analysis
+      const analysisContent = await generateMarketAnalysis(cards);
+      await handleCardUpdate(cardData.id, "Analyse de Marché (TAM/SAM/SOM & Concurrents)", analysisContent);
+      
+      // Also send a message to chat
+      const assistantMsgRes = await fetch(`/api/projects/${id}/messages`, {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ role: "assistant", content: "J'ai généré une analyse de marché détaillée incluant la recherche de concurrents et le calcul TAM/SAM/SOM. Vous la trouverez sur le canvas." }),
+      });
+      const assistantMsgData = await assistantMsgRes.json();
+      setMessages(prev => [...prev, assistantMsgData]);
+      socketRef.current?.emit("chat-message", { projectId: id, message: assistantMsgData });
+      
+    } catch (error) {
+      console.error(error);
+      addToast("Erreur lors de la génération de l'analyse de marché.", "error");
     } finally {
       setLoading(false);
     }
@@ -835,10 +879,10 @@ export default function Project() {
     e.preventDefault();
   };
 
-  if (!project) return <div className="min-h-screen flex items-center justify-center bg-[#FDF7F1]">Chargement...</div>;
+  if (!project) return <div className="min-h-screen flex items-center justify-center bg-slate-50">Chargement...</div>;
 
   return (
-    <div className="flex h-screen bg-[#FDF7F1] overflow-hidden relative">
+    <div className="flex h-screen bg-slate-50 overflow-hidden relative">
       {/* Mobile Header */}
       <div className="md:hidden absolute top-0 left-0 right-0 h-14 bg-white border-b border-neutral-200 flex items-center justify-between px-4 z-50">
         <div className="flex items-center gap-2">
@@ -880,6 +924,13 @@ export default function Project() {
           )}
           
           {user && (
+            <button onClick={() => { handleGenerateMarketAnalysis(); setIsMobileMenuOpen(false); }} disabled={loading} className="flex items-center gap-3 text-sm font-medium text-indigo-600 p-2 hover:bg-indigo-50 rounded-lg disabled:opacity-50 w-full text-left">
+              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
+              {loading ? "Analyse..." : "Analyse de Marché"}
+            </button>
+          )}
+          
+          {user && (
             <button onClick={() => { handleGeneratePitchDeck(); setIsMobileMenuOpen(false); }} disabled={loading} className="flex items-center gap-3 text-sm font-medium text-amber-600 p-2 hover:bg-amber-50 rounded-lg disabled:opacity-50 w-full text-left">
               {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Crown className="w-4 h-4" />}
               {loading ? "Génération..." : "Générer Pitch Deck"}
@@ -889,7 +940,7 @@ export default function Project() {
           {project.user_id === user?.id && (
             <button 
               onClick={() => { setShowReferralModal(true); setIsMobileMenuOpen(false); }}
-              className="flex items-center gap-3 text-sm font-medium text-[#FF6321] p-2 hover:bg-orange-50 rounded-lg"
+              className="flex items-center gap-3 text-sm font-medium text-blue-600 p-2 hover:bg-blue-50 rounded-lg"
             >
               <Gift className="w-4 h-4" />
               Offre Agence
@@ -913,13 +964,13 @@ export default function Project() {
       {/* Left Sidebar - Chat */}
       <div 
         className={`
-          absolute md:static inset-y-0 left-0 z-40 w-full md:w-[320px] bg-[#FDF7F1] border-r border-neutral-200 flex flex-col shadow-sm transition-transform duration-300 ease-in-out
+          absolute md:static inset-y-0 left-0 z-40 w-full md:w-[320px] bg-slate-50 border-r border-neutral-200 flex flex-col shadow-sm transition-transform duration-300 ease-in-out
           ${isChatOpen ? 'translate-x-0 pt-14 md:pt-0' : '-translate-x-full md:translate-x-0'}
         `}
         onDrop={handleChatDrop}
         onDragOver={handleDragOver}
       >
-        <div className="hidden md:flex p-3 border-b border-[#e0ded8] justify-between items-center bg-[#f5f5f0]">
+        <div className="hidden md:flex p-3 border-b border-neutral-200 justify-between items-center bg-slate-50">
           <div className="flex gap-4 text-neutral-600">
             <button onClick={() => navigate('/')} className="hover:text-neutral-900 transition-colors" title="Menu">
               <Menu className="w-5 h-5" />
@@ -943,7 +994,7 @@ export default function Project() {
           </div>
         </div>
         
-        <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-[#f5f5f0] custom-scrollbar">
+        <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-slate-50 custom-scrollbar">
           {messages.map((m) => (
             <div key={m.id} className="flex flex-col gap-2">
               {m.role === 'assistant' ? (
@@ -983,11 +1034,11 @@ export default function Project() {
                 </div>
               ) : (
                 <div className="flex flex-col items-start w-full">
-                  <div className="bg-[#ebe9e4] border border-[#dcdad2] rounded-2xl p-4 text-[15px] text-neutral-700 relative w-full shadow-sm">
+                  <div className="bg-white border border-neutral-200 rounded-2xl p-4 text-[15px] text-neutral-700 relative w-full shadow-sm">
                     <div className="pr-10 leading-relaxed">
                       {m.content}
                     </div>
-                    <div className="absolute top-4 right-4 w-7 h-7 bg-white rounded-full flex items-center justify-center shadow-sm overflow-hidden border border-[#dcdad2]">
+                    <div className="absolute top-4 right-4 w-7 h-7 bg-white rounded-full flex items-center justify-center shadow-sm overflow-hidden border border-neutral-200">
                        <img src="/logo.png" alt="Avatar" className="w-5 h-5 object-contain" onError={(e) => { e.currentTarget.style.display = 'none'; (e.currentTarget.nextElementSibling as HTMLElement).style.display = 'flex'; }} />
                        <div className="hidden w-full h-full items-center justify-center text-[10px] font-bold text-blue-600 bg-white">US</div>
                     </div>
@@ -1018,7 +1069,7 @@ export default function Project() {
           <div ref={messagesEndRef} />
         </div>
 
-        <div className="px-4 pb-4 pt-2 bg-[#f5f5f0] flex flex-col relative">
+        <div className="px-4 pb-4 pt-2 bg-slate-50 flex flex-col relative">
           {user ? (
             <>
               {image && (
@@ -1032,11 +1083,11 @@ export default function Project() {
                   </button>
                 </div>
               )}
-              <div className="border border-[#dcdad2] rounded-xl bg-[#f5f5f0] px-4 py-3 pb-8 -mb-5 flex justify-between items-start">
+              <div className="border border-neutral-200 rounded-xl bg-slate-50 px-4 py-3 pb-8 -mb-5 flex justify-between items-start">
                 <span className="text-sm text-neutral-600">{user?.credits ?? 0} credits remaining</span>
                 <button className="bg-[#4a4a4a] text-white text-xs font-medium px-3 py-1.5 rounded-md hover:bg-[#3a3a3a] transition-colors">Add credits</button>
               </div>
-              <div className="bg-white rounded-xl border border-[#dcdad2] flex items-center p-1.5 relative z-10 shadow-sm">
+              <div className="bg-white rounded-xl border border-neutral-200 flex items-center p-1.5 relative z-10 shadow-sm">
                 <button 
                   onClick={() => fileInputRef.current?.click()}
                   className="p-2 text-neutral-500 hover:text-neutral-700 transition-colors"
@@ -1061,7 +1112,7 @@ export default function Project() {
                 <button 
                   onClick={() => handleSend()}
                   disabled={loading || (!input.trim() && !image)}
-                  className="bg-[#dca896] text-white p-2 rounded-lg hover:bg-[#d09c8a] transition-colors disabled:opacity-50"
+                  className="bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
                 >
                   {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <ArrowUp className="w-5 h-5" />}
                 </button>
@@ -1147,6 +1198,12 @@ export default function Project() {
               </button>
             )}
             {user && (
+              <button onClick={handleGenerateMarketAnalysis} disabled={loading} className="flex items-center gap-2 text-sm font-medium text-indigo-600 bg-indigo-50 border border-indigo-200 px-3 py-1.5 rounded-md hover:bg-indigo-100 transition-colors disabled:opacity-50">
+                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
+                {loading ? "Analyse..." : "Analyse de Marché"}
+              </button>
+            )}
+            {user && (
               <button onClick={handleGeneratePitchDeck} disabled={loading} className="flex items-center gap-2 text-sm font-medium text-amber-600 bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-md hover:bg-amber-100 transition-colors disabled:opacity-50">
                 {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Crown className="w-4 h-4" />}
                 {loading ? "Génération..." : "Générer Pitch Deck"}
@@ -1155,7 +1212,7 @@ export default function Project() {
             {project.user_id === user?.id && (
               <button 
                 onClick={() => setShowReferralModal(true)}
-                className="bg-[#FF6321] text-white text-xs font-medium px-3 py-1.5 rounded-md hover:bg-[#e55a1e] transition-colors flex items-center gap-1"
+                className="bg-blue-600 text-white text-xs font-medium px-3 py-1.5 rounded-md hover:bg-blue-700 transition-colors flex items-center gap-1"
               >
                 <Gift className="w-3 h-3" />
                 <span className="hidden sm:inline">Offre Agence</span>
@@ -1270,7 +1327,7 @@ export default function Project() {
                     type="checkbox" 
                     checked={project.is_private === 0}
                     onChange={handleProjectPrivacyToggle}
-                    className="w-4 h-4 text-[#E8794A] rounded border-neutral-300 focus:ring-[#E8794A]"
+                    className="w-4 h-4 text-blue-600 rounded border-neutral-300 focus:ring-blue-600"
                   />
                   <div className="flex flex-col">
                     <span className="font-medium text-neutral-800 text-sm">Lien public</span>
@@ -1292,7 +1349,7 @@ export default function Project() {
                   navigator.clipboard.writeText(window.location.href);
                   addToast("Lien copié !", "success");
                 }}
-                className="px-4 py-2 bg-[#E8794A] text-white font-medium rounded-lg hover:bg-[#d66b3d] transition-colors whitespace-nowrap text-sm"
+                className="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap text-sm"
               >
                 Copier
               </button>
@@ -1370,16 +1427,16 @@ export default function Project() {
       {showExportModal && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
           <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl">
-            <h2 className="text-xl font-bold text-neutral-800 mb-4">Prêt à passer à l'action ? 🚀</h2>
+            <h2 className="text-xl font-bold text-neutral-800 mb-4">Prêt à passer à l'action ?</h2>
             <p className="text-neutral-600 mb-6 leading-relaxed">
               Si vous souhaitez appliquer le plan d'action fourni par cette IA, contactez notre agence <strong>Uprising Studio</strong> pour qu'on le mette en place pour vous.
               <br /><br />
-              🎁 <strong>Première consultation 100% gratuite !</strong>
+              <strong>Première consultation 100% gratuite !</strong>
             </p>
             <div className="flex flex-col gap-3">
               <a 
                 href="mailto:contact@uprising-studio.com?subject=Consultation%20gratuite%20-%20Plan%20d'action"
-                className="w-full bg-[#E8794A] text-white font-semibold py-3 rounded-xl text-center hover:bg-[#d66b3d] transition-colors"
+                className="w-full bg-blue-600 text-white font-semibold py-3 rounded-xl text-center hover:bg-blue-700 transition-colors"
                 onClick={() => setShowExportModal(false)}
               >
                 Contacter l'agence

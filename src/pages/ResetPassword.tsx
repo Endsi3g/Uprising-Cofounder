@@ -37,7 +37,7 @@ export default function ResetPassword() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FDF7F1] flex items-center justify-center px-8">
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center px-8">
       <div className="w-full max-w-md bg-white p-8 rounded-2xl shadow-sm border border-neutral-200">
         <h1 className="text-2xl font-semibold text-neutral-900 text-center mb-6">Réinitialiser le mot de passe</h1>
         
@@ -52,7 +52,7 @@ export default function ResetPassword() {
               required
               value={email}
               onChange={e => setEmail(e.target.value)}
-              className="w-full border border-neutral-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#E8794A] focus:border-transparent"
+              className="w-full border border-neutral-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
             />
           </div>
           <div>
@@ -62,13 +62,13 @@ export default function ResetPassword() {
               required
               value={newPassword}
               onChange={e => setNewPassword(e.target.value)}
-              className="w-full border border-neutral-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#E8794A] focus:border-transparent"
+              className="w-full border border-neutral-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
             />
           </div>
           <button 
             type="submit"
             disabled={loading}
-            className="w-full bg-[#E8794A] text-white rounded-lg py-2 font-medium hover:bg-[#d66b3d] transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+            className="w-full bg-blue-600 text-white rounded-lg py-2 font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
           >
             {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : null}
             {loading ? "Réinitialisation..." : "Réinitialiser"}
@@ -77,7 +77,7 @@ export default function ResetPassword() {
         
         <div className="mt-6 text-center text-sm text-neutral-500">
           <p>
-            Vous vous souvenez de votre mot de passe ? <Link to="/login" className="text-[#E8794A] hover:underline">Se connecter</Link>
+            Vous vous souvenez de votre mot de passe ? <Link to="/login" className="text-blue-600 hover:underline">Se connecter</Link>
           </p>
         </div>
       </div>

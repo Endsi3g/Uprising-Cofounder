@@ -22,7 +22,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
   const location = useLocation();
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center bg-[#FDF7F1]">Chargement...</div>;
+  if (loading) return <div className="min-h-screen flex items-center justify-center bg-slate-50">Chargement...</div>;
   if (!user) return <Navigate to="/welcome" />;
   
   if (user.onboarding_completed === 0 && location.pathname !== '/user-onboarding') {
@@ -39,7 +39,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 const AdminRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center bg-[#FDF7F1]">Chargement...</div>;
+  if (loading) return <div className="min-h-screen flex items-center justify-center bg-slate-50">Chargement...</div>;
   if (!user) return <Navigate to="/welcome" />;
   if (user.role !== 'admin') return <Navigate to="/" />;
 

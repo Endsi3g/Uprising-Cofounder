@@ -51,6 +51,12 @@ export default function Home() {
         },
         body: JSON.stringify({ name: projectName, description: projectDescription, mode, is_private: isPrivate }),
       });
+      
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || "Failed to create project");
+      }
+      
       const project = await res.json();
 
       if (template) {
@@ -125,11 +131,11 @@ export default function Home() {
     });
 
   return (
-    <div className="flex h-screen bg-[#FDF7F1]">
+    <div className="flex h-screen bg-slate-50">
       {/* Mobile Header */}
-      <div className="md:hidden fixed top-0 left-0 right-0 h-14 bg-[#FDF7F1] border-b border-neutral-200 flex items-center justify-between px-4 z-50">
+      <div className="md:hidden fixed top-0 left-0 right-0 h-14 bg-slate-50 border-b border-neutral-200 flex items-center justify-between px-4 z-50">
         <div className="flex items-center gap-2 font-bold text-lg">
-          <div className="w-6 h-6 bg-[#E8794A] rounded-md"></div>
+          <div className="w-6 h-6 bg-blue-600 rounded-md"></div>
           Uprising Cofounder
         </div>
         <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-2">
@@ -139,12 +145,12 @@ export default function Home() {
 
       {/* Sidebar */}
       <div className={`
-        fixed md:static inset-y-0 left-0 z-40 w-[260px] bg-[#FDF7F1] border-r border-neutral-200 flex flex-col justify-between p-4 transition-transform duration-300 ease-in-out
+        fixed md:static inset-y-0 left-0 z-40 w-[260px] bg-slate-50 border-r border-neutral-200 flex flex-col justify-between p-4 transition-transform duration-300 ease-in-out
         ${isMobileMenuOpen ? 'translate-x-0 pt-20' : '-translate-x-full md:translate-x-0'}
       `}>
         <div>
           <div className="hidden md:flex items-center gap-2 font-bold text-lg mb-8 px-2">
-            <div className="w-6 h-6 bg-[#E8794A] rounded-md"></div>
+            <div className="w-6 h-6 bg-blue-600 rounded-md"></div>
             Uprising Cofounder
           </div>
           <nav className="space-y-1">
@@ -194,7 +200,7 @@ export default function Home() {
       <div className="flex-1 flex flex-col items-center justify-center px-4 md:px-8 relative pt-14 md:pt-0 overflow-y-auto">
         <div className="w-full max-w-[720px] py-8">
           <div className="flex justify-center mb-6">
-            <div className="flex items-center gap-2 text-xs font-medium text-amber-600 bg-amber-50 px-3 py-1 rounded-full border border-amber-200 shadow-sm">
+            <div className="flex items-center gap-2 text-xs font-medium text-blue-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-200 shadow-sm">
               <Crown className="w-3 h-3" /> Plan Pro Actif
             </div>
           </div>
@@ -238,7 +244,7 @@ export default function Home() {
               <button 
                 onClick={() => handleStartProject()}
                 disabled={isCreatingProject}
-                className="bg-[#E8794A]/20 text-[#E8794A] hover:bg-[#E8794A] hover:text-white transition-colors rounded-full w-full sm:w-8 h-8 flex items-center justify-center disabled:opacity-50"
+                className="bg-blue-600/20 text-blue-600 hover:bg-blue-600 hover:text-white transition-colors rounded-full w-full sm:w-8 h-8 flex items-center justify-center disabled:opacity-50"
               >
                 {isCreatingProject ? <Loader2 className="w-4 h-4 animate-spin" /> : (
                   <>
@@ -271,7 +277,7 @@ export default function Home() {
             <div className="flex items-center gap-2 text-sm text-neutral-500 font-medium">
               Mode privé
               <div 
-                className={`w-8 h-4 rounded-full relative cursor-pointer transition-colors ${isPrivate ? 'bg-[#E8794A]' : 'bg-neutral-200'}`} 
+                className={`w-8 h-4 rounded-full relative cursor-pointer transition-colors ${isPrivate ? 'bg-blue-600' : 'bg-neutral-200'}`} 
                 onClick={() => setIsPrivate(!isPrivate)}
               >
                 <div className={`w-3 h-3 bg-white rounded-full absolute top-0.5 shadow-sm transition-transform ${isPrivate ? 'left-4' : 'left-0.5'}`}></div>
@@ -291,12 +297,12 @@ export default function Home() {
                   key={template.id}
                   onClick={() => handleStartProject(undefined, template)}
                   disabled={isCreatingProject}
-                  className="flex flex-col items-center gap-2 p-4 bg-white border border-neutral-200 rounded-2xl hover:border-[#E8794A] hover:shadow-md transition-all group text-center disabled:opacity-50 disabled:hover:border-neutral-200 disabled:hover:shadow-none disabled:cursor-not-allowed"
+                  className="flex flex-col items-center gap-2 p-4 bg-white border border-neutral-200 rounded-2xl hover:border-blue-600 hover:shadow-md transition-all group text-center disabled:opacity-50 disabled:hover:border-neutral-200 disabled:hover:shadow-none disabled:cursor-not-allowed"
                 >
-                  <div className="w-10 h-10 bg-neutral-50 rounded-xl flex items-center justify-center group-hover:bg-[#E8794A]/10 transition-colors">
-                    <template.icon className="w-5 h-5 text-neutral-400 group-hover:text-[#E8794A] transition-colors" />
+                  <div className="w-10 h-10 bg-neutral-50 rounded-xl flex items-center justify-center group-hover:bg-blue-600/10 transition-colors">
+                    <template.icon className="w-5 h-5 text-neutral-400 group-hover:text-blue-600 transition-colors" />
                   </div>
-                  <span className="text-xs font-medium text-neutral-700 group-hover:text-[#E8794A] transition-colors leading-tight">
+                  <span className="text-xs font-medium text-neutral-700 group-hover:text-blue-600 transition-colors leading-tight">
                     {template.name.split(' (')[0]}
                   </span>
                 </button>
@@ -325,7 +331,7 @@ export default function Home() {
                     placeholder="Rechercher..." 
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-9 pr-4 py-1.5 text-sm border border-neutral-200 rounded-lg focus:outline-none focus:border-[#E8794A] focus:ring-1 focus:ring-[#E8794A] w-full sm:w-48"
+                    className="pl-9 pr-4 py-1.5 text-sm border border-neutral-200 rounded-lg focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 w-full sm:w-48"
                   />
                 </div>
                 <button 
@@ -345,11 +351,11 @@ export default function Home() {
                   <div 
                     key={project.id}
                     onClick={() => navigate(`/project/${project.id}`)}
-                    className="bg-white rounded-xl border border-neutral-200 p-4 hover:border-[#E8794A] hover:shadow-md transition-all cursor-pointer group flex flex-col justify-between min-h-[120px]"
+                    className="bg-white rounded-xl border border-neutral-200 p-4 hover:border-blue-600 hover:shadow-md transition-all cursor-pointer group flex flex-col justify-between min-h-[120px]"
                   >
                     <div>
                       <div className="flex justify-between items-start mb-2">
-                        <h3 className="font-semibold text-neutral-800 text-base group-hover:text-[#E8794A] transition-colors line-clamp-1 flex items-center gap-2">
+                        <h3 className="font-semibold text-neutral-800 text-base group-hover:text-blue-600 transition-colors line-clamp-1 flex items-center gap-2">
                           {project.name}
                           {project.is_private === 1 ? (
                             <span title="Projet privé"><Lock className="w-3 h-3 text-neutral-400" /></span>
@@ -396,7 +402,7 @@ export default function Home() {
           <div className="bg-white rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
             <div className="p-6 border-b border-neutral-100 flex justify-between items-center bg-neutral-50/50">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-amber-100 text-amber-600 rounded-xl flex items-center justify-center">
+                <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center">
                   <Lightbulb className="w-5 h-5" />
                 </div>
                 <div>
@@ -444,13 +450,13 @@ export default function Home() {
                       value={brainstormInterests}
                       onChange={(e) => setBrainstormInterests(e.target.value)}
                       placeholder={businessType === 'startup' ? "Ex: IA, Santé, Éducation, SaaS B2B..." : "Ex: Restauration, Agence, Artisanat, Consulting..."}
-                      className="flex-1 border border-neutral-200 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-[#E8794A] focus:ring-1 focus:ring-[#E8794A]"
+                      className="flex-1 border border-neutral-200 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
                       onKeyDown={(e) => { if (e.key === 'Enter') handleBrainstorm(); }}
                     />
                     <button
                       onClick={handleBrainstorm}
                       disabled={isGeneratingIdeas}
-                      className="bg-[#E8794A] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#d66a3d] transition-colors disabled:opacity-50 flex items-center gap-2"
+                      className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center gap-2"
                     >
                       {isGeneratingIdeas ? (
                         <><Loader2 className="w-4 h-4 animate-spin" /> Génération...</>
@@ -495,7 +501,7 @@ export default function Home() {
                   {generatedIdeas.map((idea, index) => (
                     <div 
                       key={index}
-                      className="border border-neutral-200 rounded-xl p-4 hover:border-[#E8794A] hover:shadow-md transition-all cursor-pointer group"
+                      className="border border-neutral-200 rounded-xl p-4 hover:border-blue-600 hover:shadow-md transition-all cursor-pointer group"
                       onClick={() => {
                         setShowBrainstormModal(false);
                         const richPrompt = `Je veux créer une entreprise appelée "${idea.title}".\n\nDescription: ${idea.description}\n\nCible: ${idea.targetAudience || 'Non spécifiée'}\n\nBusiness Model: ${idea.businessModel || 'Non spécifié'}\n\nOpportunité de marché: ${idea.marketOpportunity || 'Non spécifiée'}\n\nTemps estimé pour lancer: ${idea.estimatedTime || 'Non spécifié'}\n\nMéthode gratuite (outils): ${idea.methods?.free || 'Non spécifiée'}\n\nMéthode payante (outils): ${idea.methods?.paid || 'Non spécifiée'}\n\nAgis comme mon cofondateur, analyse cette idée en profondeur, donne-moi ton avis critique et génère un plan d'action complet sur le canvas en prenant en compte ces méthodes.`;
@@ -503,8 +509,8 @@ export default function Home() {
                       }}
                     >
                       <div className="flex justify-between items-start mb-2">
-                        <h4 className="font-semibold text-neutral-800 text-lg group-hover:text-[#E8794A] transition-colors">{idea.title}</h4>
-                        <span className="text-xs font-medium bg-neutral-100 text-neutral-600 px-2 py-1 rounded-full group-hover:bg-[#E8794A]/10 group-hover:text-[#E8794A] transition-colors whitespace-nowrap ml-2">
+                        <h4 className="font-semibold text-neutral-800 text-lg group-hover:text-blue-600 transition-colors">{idea.title}</h4>
+                        <span className="text-xs font-medium bg-neutral-100 text-neutral-600 px-2 py-1 rounded-full group-hover:bg-blue-600/10 group-hover:text-blue-600 transition-colors whitespace-nowrap ml-2">
                           Sélectionner →
                         </span>
                       </div>
@@ -532,13 +538,13 @@ export default function Home() {
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4 pt-4 border-t border-neutral-100">
                           <div className="bg-neutral-50 rounded-lg p-3">
                             <div className="flex items-center gap-1.5 text-xs font-semibold text-neutral-700 mb-1.5">
-                              <Zap className="w-3.5 h-3.5 text-amber-500" /> Méthode 100% Gratuite
+                              <Zap className="w-3.5 h-3.5 text-blue-500" /> Méthode 100% Gratuite
                             </div>
                             <p className="text-xs text-neutral-600 leading-relaxed">{idea.methods.free}</p>
                           </div>
                           <div className="bg-neutral-50 rounded-lg p-3">
                             <div className="flex items-center gap-1.5 text-xs font-semibold text-neutral-700 mb-1.5">
-                              <CreditCard className="w-3.5 h-3.5 text-[#E8794A]" /> Méthode Payante (Rapide)
+                              <CreditCard className="w-3.5 h-3.5 text-blue-600" /> Méthode Payante (Rapide)
                             </div>
                             <p className="text-xs text-neutral-600 leading-relaxed">{idea.methods.paid}</p>
                           </div>

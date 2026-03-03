@@ -11,11 +11,11 @@ export default function Help() {
   const [activeTab, setActiveTab] = useState<'guide' | 'faq'>('guide');
 
   return (
-    <div className="flex h-screen bg-[#FDF7F1]">
+    <div className="flex h-screen bg-slate-50">
       {/* Mobile Header */}
-      <div className="md:hidden fixed top-0 left-0 right-0 h-14 bg-[#FDF7F1] border-b border-neutral-200 flex items-center justify-between px-4 z-50">
+      <div className="md:hidden fixed top-0 left-0 right-0 h-14 bg-slate-50 border-b border-neutral-200 flex items-center justify-between px-4 z-50">
         <div className="flex items-center gap-2 font-bold text-lg">
-          <div className="w-6 h-6 bg-[#E8794A] rounded-md"></div>
+          <div className="w-6 h-6 bg-blue-600 rounded-md"></div>
           Uprising Cofounder
         </div>
         <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-2">
@@ -25,12 +25,12 @@ export default function Help() {
 
       {/* Sidebar */}
       <div className={`
-        fixed md:static inset-y-0 left-0 z-40 w-[260px] bg-[#FDF7F1] border-r border-neutral-200 flex flex-col justify-between p-4 transition-transform duration-300 ease-in-out
+        fixed md:static inset-y-0 left-0 z-40 w-[260px] bg-slate-50 border-r border-neutral-200 flex flex-col justify-between p-4 transition-transform duration-300 ease-in-out
         ${isMobileMenuOpen ? 'translate-x-0 pt-20' : '-translate-x-full md:translate-x-0'}
       `}>
         <div>
           <div className="hidden md:flex items-center gap-2 font-bold text-lg mb-8 px-2">
-            <div className="w-6 h-6 bg-[#E8794A] rounded-md"></div>
+            <div className="w-6 h-6 bg-blue-600 rounded-md"></div>
             Uprising Cofounder
           </div>
           <nav className="space-y-1">
@@ -77,17 +77,17 @@ export default function Help() {
           <div className="flex items-center gap-4 border-b border-neutral-200 mb-8">
             <button 
               onClick={() => setActiveTab('guide')}
-              className={`pb-3 text-sm font-medium transition-colors relative ${activeTab === 'guide' ? 'text-[#E8794A]' : 'text-neutral-500 hover:text-neutral-700'}`}
+              className={`pb-3 text-sm font-medium transition-colors relative ${activeTab === 'guide' ? 'text-blue-600' : 'text-neutral-500 hover:text-neutral-700'}`}
             >
               Guide de Démarrage
-              {activeTab === 'guide' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#E8794A] rounded-t-full"></div>}
+              {activeTab === 'guide' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600 rounded-t-full"></div>}
             </button>
             <button 
               onClick={() => setActiveTab('faq')}
-              className={`pb-3 text-sm font-medium transition-colors relative ${activeTab === 'faq' ? 'text-[#E8794A]' : 'text-neutral-500 hover:text-neutral-700'}`}
+              className={`pb-3 text-sm font-medium transition-colors relative ${activeTab === 'faq' ? 'text-blue-600' : 'text-neutral-500 hover:text-neutral-700'}`}
             >
               Foire Aux Questions
-              {activeTab === 'faq' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#E8794A] rounded-t-full"></div>}
+              {activeTab === 'faq' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600 rounded-t-full"></div>}
             </button>
           </div>
 
@@ -118,15 +118,15 @@ export default function Help() {
                   </p>
                   <ul className="space-y-2 text-sm text-neutral-600">
                     <li className="flex items-start gap-2">
-                      <div className="w-1.5 h-1.5 bg-[#E8794A] rounded-full mt-1.5"></div>
+                      <div className="w-1.5 h-1.5 bg-blue-600 rounded-full mt-1.5"></div>
                       Valider votre idée de business
                     </li>
                     <li className="flex items-start gap-2">
-                      <div className="w-1.5 h-1.5 bg-[#E8794A] rounded-full mt-1.5"></div>
+                      <div className="w-1.5 h-1.5 bg-blue-600 rounded-full mt-1.5"></div>
                       Identifier votre marché cible
                     </li>
                     <li className="flex items-start gap-2">
-                      <div className="w-1.5 h-1.5 bg-[#E8794A] rounded-full mt-1.5"></div>
+                      <div className="w-1.5 h-1.5 bg-blue-600 rounded-full mt-1.5"></div>
                       Créer votre MVP (Produit Minimum Viable)
                     </li>
                   </ul>
@@ -141,15 +141,15 @@ export default function Help() {
                   </p>
                   <ul className="space-y-2 text-sm text-neutral-600">
                     <li className="flex items-start gap-2">
-                      <div className="w-1.5 h-1.5 bg-[#E8794A] rounded-full mt-1.5"></div>
+                      <div className="w-1.5 h-1.5 bg-blue-600 rounded-full mt-1.5"></div>
                       L'optimisation des opérations
                     </li>
                     <li className="flex items-start gap-2">
-                      <div className="w-1.5 h-1.5 bg-[#E8794A] rounded-full mt-1.5"></div>
+                      <div className="w-1.5 h-1.5 bg-blue-600 rounded-full mt-1.5"></div>
                       L'acquisition de nouveaux clients
                     </li>
                     <li className="flex items-start gap-2">
-                      <div className="w-1.5 h-1.5 bg-[#E8794A] rounded-full mt-1.5"></div>
+                      <div className="w-1.5 h-1.5 bg-blue-600 rounded-full mt-1.5"></div>
                       L'analyse de la concurrence
                     </li>
                   </ul>
@@ -196,7 +196,7 @@ export default function Help() {
                   placeholder="Rechercher une question..." 
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 border border-neutral-200 rounded-xl focus:outline-none focus:border-[#E8794A] focus:ring-1 focus:ring-[#E8794A] shadow-sm"
+                  className="w-full pl-10 pr-4 py-3 border border-neutral-200 rounded-xl focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 shadow-sm"
                 />
               </div>
 
@@ -284,7 +284,7 @@ export default function Help() {
                 ).length === 0 && (
                   <div className="text-center py-12">
                     <p className="text-neutral-500">Aucun résultat trouvé pour "{searchQuery}"</p>
-                    <button onClick={() => setSearchQuery("")} className="text-[#E8794A] text-sm font-medium mt-2 hover:underline">
+                    <button onClick={() => setSearchQuery("")} className="text-blue-600 text-sm font-medium mt-2 hover:underline">
                       Effacer la recherche
                     </button>
                   </div>

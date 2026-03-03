@@ -43,7 +43,7 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FDF7F1] flex items-center justify-center px-8">
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center px-8">
       <div className="w-full max-w-md bg-white p-8 rounded-2xl shadow-sm border border-neutral-200">
         <h1 className="text-2xl font-semibold text-neutral-900 text-center mb-6">Bon retour</h1>
         
@@ -57,7 +57,7 @@ export default function Login() {
               required
               value={email}
               onChange={e => setEmail(e.target.value)}
-              className="w-full border border-neutral-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#E8794A] focus:border-transparent"
+              className="w-full border border-neutral-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
             />
           </div>
           <div>
@@ -67,13 +67,13 @@ export default function Login() {
               required
               value={password}
               onChange={e => setPassword(e.target.value)}
-              className="w-full border border-neutral-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#E8794A] focus:border-transparent"
+              className="w-full border border-neutral-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
             />
           </div>
           <button 
             type="submit"
             disabled={loading}
-            className="w-full bg-[#E8794A] text-white rounded-lg py-2 font-medium hover:bg-[#d66b3d] transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+            className="w-full bg-blue-600 text-white rounded-lg py-2 font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
           >
             {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : null}
             {loading ? "Connexion..." : "Se connecter"}
@@ -82,10 +82,10 @@ export default function Login() {
         
         <div className="mt-6 text-center text-sm text-neutral-500 space-y-2">
           <p>
-            Pas encore de compte ? <Link to="/register" className="text-[#E8794A] hover:underline">S'inscrire</Link>
+            Pas encore de compte ? <Link to="/register" className="text-blue-600 hover:underline">S'inscrire</Link>
           </p>
           <p>
-            Mot de passe oublié ? <Link to="/reset-password" className="text-[#E8794A] hover:underline">Le réinitialiser</Link>
+            Mot de passe oublié ? <Link to="/reset-password" className="text-blue-600 hover:underline">Le réinitialiser</Link>
           </p>
         </div>
       </div>

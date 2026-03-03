@@ -34,6 +34,35 @@ export async function generatePitchDeck(projectContext: any) {
   return response.text || "Erreur lors de la génération du Pitch Deck.";
 }
 
+export async function generateMarketAnalysis(projectContext: any) {
+  const ai = getAI();
+  const prompt = `Tu es un expert en analyse de marché et stratégie d'entreprise.
+  À partir du contexte du projet suivant (cartes du canvas), génère une analyse de marché complète en format Markdown.
+  L'analyse doit inclure :
+  1. Recherche de Concurrents : Identifie 3 à 5 concurrents directs ou indirects sur le marché (de préférence canadien ou nord-américain). Pour chaque concurrent, donne ses forces, faiblesses, et son positionnement.
+  2. Calcul TAM/SAM/SOM :
+     - TAM (Total Addressable Market) : Le marché total.
+     - SAM (Serviceable Available Market) : La part du TAM que tu peux réellement atteindre avec ton modèle d'affaires actuel.
+     - SOM (Serviceable Obtainable Market) : La part du SAM que tu peux capturer à court/moyen terme (ex: 1 à 3 ans).
+     Explique brièvement les hypothèses de calcul (utilise la devise CAD $).
+  3. Opportunités de Différenciation : Comment ce projet peut se démarquer face à la concurrence.
+
+  Contexte du projet :
+  ${JSON.stringify(projectContext)}
+  `;
+
+  const response = await ai.models.generateContent({
+    model: "gemini-3.1-pro-preview",
+    contents: prompt,
+    config: {
+      tools: [{ googleSearch: {} }],
+      thinkingConfig: { thinkingLevel: ThinkingLevel.HIGH }
+    }
+  });
+
+  return response.text || "Erreur lors de la génération de l'analyse de marché.";
+}
+
 export async function analyzeIdea(idea: string) {
   const ai = getAI();
   const system = `Tu es un analyste stratégique pour Uprising Cofounder. 

@@ -9,6 +9,12 @@
   }
 }
 
+@layer base {
+  body {
+    @apply bg-slate-50 text-slate-900;
+  }
+}
+
 .custom-scrollbar::-webkit-scrollbar {
   width: 6px;
 }

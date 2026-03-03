@@ -76,6 +76,11 @@ export default function FlashDemo() {
             })
         });
         
+        if (!projRes.ok) {
+            const errData = await projRes.json().catch(() => ({}));
+            throw new Error(errData.error || "Failed to create project");
+        }
+        
         const project = await projRes.json();
         
         // Send initial message to trigger the "Audit" persona
@@ -106,8 +111,8 @@ export default function FlashDemo() {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-[#FDF7F1]">
-      <Loader2 className="w-12 h-12 text-[#E8794A] animate-spin mb-4" />
+    <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50">
+      <Loader2 className="w-12 h-12 text-blue-600 animate-spin mb-4" />
       <h2 className="text-xl font-bold text-neutral-800">{status}</h2>
     </div>
   );

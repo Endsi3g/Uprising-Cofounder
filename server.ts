@@ -33,7 +33,7 @@ db.exec(`
     id TEXT PRIMARY KEY,
     name TEXT NOT NULL,
     description TEXT,
-    mode TEXT CHECK(mode IN ('create', 'scale')) DEFAULT 'create',
+    mode TEXT CHECK(mode IN ('create', 'scale', 'analyse')) DEFAULT 'create',
     is_private INTEGER DEFAULT 0,
     user_id TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -88,6 +88,36 @@ try {
   db.exec("ALTER TABLE projects ADD COLUMN is_private INTEGER DEFAULT 0;");
 } catch (e) {
   // Column might already exist
+}
+
+// Fix projects table CHECK constraint if it only allows create and scale
+try {
+  const tableInfo = db.prepare("SELECT sql FROM sqlite_master WHERE type='table' AND name='projects'").get() as any;
+  if (tableInfo && tableInfo.sql.includes("('create', 'scale')")) {
+    db.exec(`
+      PRAGMA foreign_keys=off;
+      BEGIN TRANSACTION;
+      CREATE TABLE projects_new (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        description TEXT,
+        mode TEXT CHECK(mode IN ('create', 'scale', 'analyse')) DEFAULT 'create',
+        is_private INTEGER DEFAULT 0,
+        user_id TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id)
+      );
+      INSERT INTO projects_new SELECT * FROM projects;
+      DROP TABLE projects;
+      ALTER TABLE projects_new RENAME TO projects;
+      CREATE INDEX IF NOT EXISTS idx_projects_user_id ON projects(user_id);
+      COMMIT;
+      PRAGMA foreign_keys=on;
+    `);
+    console.log("Migrated projects table CHECK constraint to include 'analyse'");
+  }
+} catch (e) {
+  console.error("Failed to migrate projects table:", e);
 }
 
 const userColumnsToAdd = [
@@ -365,11 +395,16 @@ async function startServer() {
   });
 
   app.post("/api/projects", authenticateToken, (req: any, res: any) => {
-    const { name, description, mode, is_private } = req.body;
-    const id = uuidv4();
-    db.prepare("INSERT INTO projects (id, name, description, mode, is_private, user_id) VALUES (?, ?, ?, ?, ?, ?)").run(id, name, description, mode || 'create', is_private ? 1 : 0, req.user.id);
-    const project = db.prepare("SELECT * FROM projects WHERE id = ?").get(id);
-    res.json(project);
+    try {
+      const { name, description, mode, is_private } = req.body;
+      const id = uuidv4();
+      db.prepare("INSERT INTO projects (id, name, description, mode, is_private, user_id) VALUES (?, ?, ?, ?, ?, ?)").run(id, name, description, mode || 'create', is_private ? 1 : 0, req.user.id);
+      const project = db.prepare("SELECT * FROM projects WHERE id = ?").get(id);
+      res.json(project);
+    } catch (error: any) {
+      console.error("Failed to create project:", error);
+      res.status(500).json({ error: error.message || "Failed to create project" });
+    }
   });
 
   app.get("/api/projects/:id", optionalAuthenticateToken, (req: any, res: any) => {

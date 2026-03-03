@@ -87,11 +87,11 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="flex h-screen bg-[#FDF7F1]">
+    <div className="flex h-screen bg-slate-50">
       {/* Mobile Header */}
-      <div className="md:hidden fixed top-0 left-0 right-0 h-14 bg-[#FDF7F1] border-b border-neutral-200 flex items-center justify-between px-4 z-50">
+      <div className="md:hidden fixed top-0 left-0 right-0 h-14 bg-slate-50 border-b border-neutral-200 flex items-center justify-between px-4 z-50">
         <div className="flex items-center gap-2 font-bold text-lg">
-          <div className="w-6 h-6 bg-[#E8794A] rounded-md"></div>
+          <div className="w-6 h-6 bg-blue-600 rounded-md"></div>
           Uprising Cofounder
         </div>
         <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-2">
@@ -101,12 +101,12 @@ export default function SettingsPage() {
 
       {/* Sidebar */}
       <div className={`
-        fixed md:static inset-y-0 left-0 z-40 w-[260px] bg-[#FDF7F1] border-r border-neutral-200 flex flex-col justify-between p-4 transition-transform duration-300 ease-in-out
+        fixed md:static inset-y-0 left-0 z-40 w-[260px] bg-slate-50 border-r border-neutral-200 flex flex-col justify-between p-4 transition-transform duration-300 ease-in-out
         ${isMobileMenuOpen ? 'translate-x-0 pt-20' : '-translate-x-full md:translate-x-0'}
       `}>
         <div>
           <div className="hidden md:flex items-center gap-2 font-bold text-lg mb-8 px-2">
-            <div className="w-6 h-6 bg-[#E8794A] rounded-md"></div>
+            <div className="w-6 h-6 bg-blue-600 rounded-md"></div>
             Uprising Cofounder
           </div>
           <nav className="space-y-1">
@@ -214,7 +214,7 @@ export default function SettingsPage() {
                 <div>
                   <label className="block text-sm font-medium text-neutral-700 mb-1 flex justify-between">
                     Bland AI (Appels Vocaux)
-                    <a href="https://docs.bland.ai/welcome/introduction" target="_blank" rel="noreferrer" className="text-[#E8794A] text-xs flex items-center gap-1 hover:underline">
+                    <a href="https://docs.bland.ai/welcome/introduction" target="_blank" rel="noreferrer" className="text-blue-600 text-xs flex items-center gap-1 hover:underline">
                       Obtenir une clé <ExternalLink className="w-3 h-3" />
                     </a>
                   </label>
@@ -223,7 +223,7 @@ export default function SettingsPage() {
                     placeholder="sk-..." 
                     value={blandApiKey}
                     onChange={(e) => setBlandApiKey(e.target.value)}
-                    className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:ring-2 focus:ring-[#E8794A]/20 focus:border-[#E8794A] outline-none"
+                    className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 outline-none"
                   />
                 </div>
 
@@ -231,7 +231,7 @@ export default function SettingsPage() {
                 <div className="border-t border-neutral-100 pt-4 mt-4">
                   <label className="block text-sm font-medium text-neutral-700 mb-1 flex justify-between">
                     Twilio (SMS)
-                    <a href="https://www.twilio.com/console" target="_blank" rel="noreferrer" className="text-[#E8794A] text-xs flex items-center gap-1 hover:underline">
+                    <a href="https://www.twilio.com/console" target="_blank" rel="noreferrer" className="text-blue-600 text-xs flex items-center gap-1 hover:underline">
                       Console Twilio <ExternalLink className="w-3 h-3" />
                     </a>
                   </label>
@@ -241,21 +241,21 @@ export default function SettingsPage() {
                       placeholder="Account SID (AC...)" 
                       value={twilioAccountSid}
                       onChange={(e) => setTwilioAccountSid(e.target.value)}
-                      className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:ring-2 focus:ring-[#E8794A]/20 focus:border-[#E8794A] outline-none"
+                      className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 outline-none"
                     />
                     <input 
                       type="password" 
                       placeholder="Auth Token" 
                       value={twilioAuthToken}
                       onChange={(e) => setTwilioAuthToken(e.target.value)}
-                      className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:ring-2 focus:ring-[#E8794A]/20 focus:border-[#E8794A] outline-none"
+                      className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 outline-none"
                     />
                     <input 
                       type="text" 
                       placeholder="Numéro Twilio (+1...)" 
                       value={twilioPhoneNumber}
                       onChange={(e) => setTwilioPhoneNumber(e.target.value)}
-                      className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:ring-2 focus:ring-[#E8794A]/20 focus:border-[#E8794A] outline-none md:col-span-2"
+                      className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 outline-none md:col-span-2"
                     />
                   </div>
                 </div>
@@ -264,7 +264,7 @@ export default function SettingsPage() {
                 <div className="border-t border-neutral-100 pt-4 mt-4">
                   <label className="block text-sm font-medium text-neutral-700 mb-1 flex justify-between">
                     ElevenLabs (Synthèse Vocale)
-                    <a href="https://elevenlabs.io/app/settings/api-keys" target="_blank" rel="noreferrer" className="text-[#E8794A] text-xs flex items-center gap-1 hover:underline">
+                    <a href="https://elevenlabs.io/app/settings/api-keys" target="_blank" rel="noreferrer" className="text-blue-600 text-xs flex items-center gap-1 hover:underline">
                       Obtenir une clé <ExternalLink className="w-3 h-3" />
                     </a>
                   </label>
@@ -273,7 +273,7 @@ export default function SettingsPage() {
                     placeholder="xi-..." 
                     value={elevenLabsApiKey}
                     onChange={(e) => setElevenLabsApiKey(e.target.value)}
-                    className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:ring-2 focus:ring-[#E8794A]/20 focus:border-[#E8794A] outline-none"
+                    className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 outline-none"
                   />
                 </div>
 
@@ -281,7 +281,7 @@ export default function SettingsPage() {
                 <div className="border-t border-neutral-100 pt-4 mt-4">
                   <label className="block text-sm font-medium text-neutral-700 mb-1 flex justify-between">
                     Twenty CRM (Gestion Leads)
-                    <a href="https://twenty.com" target="_blank" rel="noreferrer" className="text-[#E8794A] text-xs flex items-center gap-1 hover:underline">
+                    <a href="https://twenty.com" target="_blank" rel="noreferrer" className="text-blue-600 text-xs flex items-center gap-1 hover:underline">
                       Site Twenty <ExternalLink className="w-3 h-3" />
                     </a>
                   </label>
@@ -290,7 +290,7 @@ export default function SettingsPage() {
                     placeholder="Clé API Twenty" 
                     value={twentyApiKey}
                     onChange={(e) => setTwentyApiKey(e.target.value)}
-                    className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:ring-2 focus:ring-[#E8794A]/20 focus:border-[#E8794A] outline-none"
+                    className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 outline-none"
                   />
                 </div>
 
@@ -308,7 +308,7 @@ export default function SettingsPage() {
                 </div>
                 <button 
                   onClick={() => setNotifications(!notifications)}
-                  className={`w-11 h-6 rounded-full relative transition-colors ${notifications ? 'bg-[#E8794A]' : 'bg-neutral-200'}`}
+                  className={`w-11 h-6 rounded-full relative transition-colors ${notifications ? 'bg-blue-600' : 'bg-neutral-200'}`}
                 >
                   <div className={`w-4 h-4 bg-white rounded-full absolute top-1 transition-transform ${notifications ? 'translate-x-6' : 'translate-x-1'}`}></div>
                 </button>
@@ -322,23 +322,23 @@ export default function SettingsPage() {
               <div className="grid grid-cols-3 gap-3">
                 <button 
                   onClick={() => setTheme('light')}
-                  className={`flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-colors ${theme === 'light' ? 'border-[#E8794A] bg-[#E8794A]/5' : 'border-neutral-200 hover:border-neutral-300'}`}
+                  className={`flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-colors ${theme === 'light' ? 'border-blue-600 bg-blue-600/5' : 'border-neutral-200 hover:border-neutral-300'}`}
                 >
-                  <Sun className={`w-5 h-5 ${theme === 'light' ? 'text-[#E8794A]' : 'text-neutral-500'}`} />
+                  <Sun className={`w-5 h-5 ${theme === 'light' ? 'text-blue-600' : 'text-neutral-500'}`} />
                   <span className="text-sm font-medium">Clair</span>
                 </button>
                 <button 
                   onClick={() => setTheme('dark')}
-                  className={`flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-colors ${theme === 'dark' ? 'border-[#E8794A] bg-[#E8794A]/5' : 'border-neutral-200 hover:border-neutral-300'}`}
+                  className={`flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-colors ${theme === 'dark' ? 'border-blue-600 bg-blue-600/5' : 'border-neutral-200 hover:border-neutral-300'}`}
                 >
-                  <Moon className={`w-5 h-5 ${theme === 'dark' ? 'text-[#E8794A]' : 'text-neutral-500'}`} />
+                  <Moon className={`w-5 h-5 ${theme === 'dark' ? 'text-blue-600' : 'text-neutral-500'}`} />
                   <span className="text-sm font-medium">Sombre</span>
                 </button>
                 <button 
                   onClick={() => setTheme('system')}
-                  className={`flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-colors ${theme === 'system' ? 'border-[#E8794A] bg-[#E8794A]/5' : 'border-neutral-200 hover:border-neutral-300'}`}
+                  className={`flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-colors ${theme === 'system' ? 'border-blue-600 bg-blue-600/5' : 'border-neutral-200 hover:border-neutral-300'}`}
                 >
-                  <Laptop className={`w-5 h-5 ${theme === 'system' ? 'text-[#E8794A]' : 'text-neutral-500'}`} />
+                  <Laptop className={`w-5 h-5 ${theme === 'system' ? 'text-blue-600' : 'text-neutral-500'}`} />
                   <span className="text-sm font-medium">Système</span>
                 </button>
               </div>
@@ -352,7 +352,7 @@ export default function SettingsPage() {
               <div className="grid grid-cols-2 gap-3">
                 <button 
                   onClick={() => setDefaultMode('create')}
-                  className={`flex flex-col items-start gap-1 p-4 rounded-xl border-2 transition-colors ${defaultMode === 'create' ? 'border-[#E8794A] bg-[#E8794A]/5' : 'border-neutral-200 hover:border-neutral-300'}`}
+                  className={`flex flex-col items-start gap-1 p-4 rounded-xl border-2 transition-colors ${defaultMode === 'create' ? 'border-blue-600 bg-blue-600/5' : 'border-neutral-200 hover:border-neutral-300'}`}
                 >
                   <span className="text-xl">🌱</span>
                   <span className="text-sm font-medium text-neutral-900">Créer</span>
@@ -360,7 +360,7 @@ export default function SettingsPage() {
                 </button>
                 <button 
                   onClick={() => setDefaultMode('scale')}
-                  className={`flex flex-col items-start gap-1 p-4 rounded-xl border-2 transition-colors ${defaultMode === 'scale' ? 'border-[#E8794A] bg-[#E8794A]/5' : 'border-neutral-200 hover:border-neutral-300'}`}
+                  className={`flex flex-col items-start gap-1 p-4 rounded-xl border-2 transition-colors ${defaultMode === 'scale' ? 'border-blue-600 bg-blue-600/5' : 'border-neutral-200 hover:border-neutral-300'}`}
                 >
                   <span className="text-xl">🚀</span>
                   <span className="text-sm font-medium text-neutral-900">Scaler</span>
@@ -384,7 +384,7 @@ export default function SettingsPage() {
                     <p className="text-sm font-medium text-neutral-800">Cookies Essentiels</p>
                     <p className="text-xs text-neutral-500">Nécessaires pour l'authentification et la sécurité.</p>
                   </div>
-                  <div className="w-11 h-6 bg-[#E8794A] rounded-full relative opacity-50 cursor-not-allowed">
+                  <div className="w-11 h-6 bg-blue-600 rounded-full relative opacity-50 cursor-not-allowed">
                     <div className="w-4 h-4 bg-white rounded-full absolute top-1 translate-x-6"></div>
                   </div>
                 </div>
@@ -396,7 +396,7 @@ export default function SettingsPage() {
                   </div>
                   <button 
                     onClick={() => setAnalyticsCookies(!analyticsCookies)}
-                    className={`w-11 h-6 rounded-full relative transition-colors ${analyticsCookies ? 'bg-[#E8794A]' : 'bg-neutral-200'}`}
+                    className={`w-11 h-6 rounded-full relative transition-colors ${analyticsCookies ? 'bg-blue-600' : 'bg-neutral-200'}`}
                   >
                     <div className={`w-4 h-4 bg-white rounded-full absolute top-1 transition-transform ${analyticsCookies ? 'translate-x-6' : 'translate-x-1'}`}></div>
                   </button>
@@ -409,7 +409,7 @@ export default function SettingsPage() {
                   </div>
                   <button 
                     onClick={() => setMarketingCookies(!marketingCookies)}
-                    className={`w-11 h-6 rounded-full relative transition-colors ${marketingCookies ? 'bg-[#E8794A]' : 'bg-neutral-200'}`}
+                    className={`w-11 h-6 rounded-full relative transition-colors ${marketingCookies ? 'bg-blue-600' : 'bg-neutral-200'}`}
                   >
                     <div className={`w-4 h-4 bg-white rounded-full absolute top-1 transition-transform ${marketingCookies ? 'translate-x-6' : 'translate-x-1'}`}></div>
                   </button>
@@ -418,7 +418,7 @@ export default function SettingsPage() {
                 <div className="pt-2 flex justify-end">
                     <button 
                         onClick={handleSaveCookiePreferences}
-                        className="text-sm text-[#E8794A] font-medium hover:underline"
+                        className="text-sm text-blue-600 font-medium hover:underline"
                     >
                         Mettre à jour les préférences de cookies
                     </button>
@@ -430,7 +430,7 @@ export default function SettingsPage() {
               <button 
                 onClick={handleSave}
                 disabled={loading}
-                className="bg-[#E8794A] text-white px-6 py-2 rounded-lg font-medium hover:bg-[#d66a3d] transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                className="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : null}
                 {loading ? "Sauvegarde..." : "Sauvegarder"}

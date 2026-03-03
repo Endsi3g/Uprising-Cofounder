@@ -38,8 +38,8 @@ export default function ReferralModal({ isOpen, onClose }: ReferralModalProps) {
                 <X className="w-5 h-5" />
               </button>
 
-              <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Gift className="w-6 h-6 text-orange-600" />
+              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Gift className="w-6 h-6 text-blue-600" />
               </div>
 
               <h2 className="text-2xl font-bold text-neutral-900 mb-2">
@@ -69,7 +69,7 @@ export default function ReferralModal({ isOpen, onClose }: ReferralModalProps) {
               <div className="space-y-3">
                 <button
                   onClick={handleCopy}
-                  className="w-full bg-[#FF6321] text-white font-medium py-2.5 rounded-lg hover:bg-[#e55a1e] transition-colors flex items-center justify-center gap-2"
+                  className="w-full bg-blue-600 text-white font-medium py-2.5 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
                 >
                   <Copy className="w-4 h-4" />
                   Copier mon lien de parrainage

@@ -14,9 +14,9 @@ export default function Welcome() {
   }, [user, navigate]);
 
   return (
-    <div className="min-h-screen bg-[#FDF7F1] flex flex-col items-center justify-center px-4 relative overflow-hidden">
+    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center px-4 relative overflow-hidden">
       {/* Decorative background elements */}
-      <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-[#E8794A]/10 rounded-full blur-3xl" />
+      <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-blue-600/10 rounded-full blur-3xl" />
       <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl" />
 
       <div className="max-w-md w-full text-center relative z-10">
@@ -35,7 +35,7 @@ export default function Welcome() {
         </div>
         
         <h1 className="text-4xl font-bold text-neutral-900 mb-4 tracking-tight">
-          Bienvenue sur <span className="text-[#E8794A]">Cofounder</span>
+          Bienvenue sur <span className="text-blue-600">Cofounder</span>
         </h1>
         
         <p className="text-lg text-neutral-600 mb-10 leading-relaxed">
@@ -45,7 +45,7 @@ export default function Welcome() {
         <div className="space-y-4">
           <button 
             onClick={() => navigate('/register')}
-            className="w-full flex items-center justify-center gap-2 bg-[#E8794A] text-white rounded-xl py-4 px-6 font-medium text-lg hover:bg-[#d66b3d] transition-all hover:scale-[1.02] active:scale-[0.98] shadow-sm"
+            className="w-full flex items-center justify-center gap-2 bg-blue-600 text-white rounded-xl py-4 px-6 font-medium text-lg hover:bg-blue-700 transition-all hover:scale-[1.02] active:scale-[0.98] shadow-sm"
           >
             <Sparkles className="w-5 h-5" />
             Commencer l'aventure

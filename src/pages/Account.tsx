@@ -12,11 +12,11 @@ export default function Account() {
   const [isUpdatingRole, setIsUpdatingRole] = useState(false);
 
   return (
-    <div className="flex h-screen bg-[#FDF7F1]">
+    <div className="flex h-screen bg-slate-50">
       {/* Mobile Header */}
-      <div className="md:hidden fixed top-0 left-0 right-0 h-14 bg-[#FDF7F1] border-b border-neutral-200 flex items-center justify-between px-4 z-50">
+      <div className="md:hidden fixed top-0 left-0 right-0 h-14 bg-slate-50 border-b border-neutral-200 flex items-center justify-between px-4 z-50">
         <div className="flex items-center gap-2 font-bold text-lg">
-          <div className="w-6 h-6 bg-[#E8794A] rounded-md"></div>
+          <div className="w-6 h-6 bg-blue-600 rounded-md"></div>
           Uprising Cofounder
         </div>
         <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-2">
@@ -26,12 +26,12 @@ export default function Account() {
 
       {/* Sidebar */}
       <div className={`
-        fixed md:static inset-y-0 left-0 z-40 w-[260px] bg-[#FDF7F1] border-r border-neutral-200 flex flex-col justify-between p-4 transition-transform duration-300 ease-in-out
+        fixed md:static inset-y-0 left-0 z-40 w-[260px] bg-slate-50 border-r border-neutral-200 flex flex-col justify-between p-4 transition-transform duration-300 ease-in-out
         ${isMobileMenuOpen ? 'translate-x-0 pt-20' : '-translate-x-full md:translate-x-0'}
       `}>
         <div>
           <div className="hidden md:flex items-center gap-2 font-bold text-lg mb-8 px-2">
-            <div className="w-6 h-6 bg-[#E8794A] rounded-md"></div>
+            <div className="w-6 h-6 bg-blue-600 rounded-md"></div>
             Uprising Cofounder
           </div>
           <nav className="space-y-1">
@@ -119,7 +119,7 @@ export default function Account() {
                       }
                     }}
                     disabled={isUpdatingRole}
-                    className="text-xs font-medium text-[#E8794A] hover:underline disabled:opacity-50 flex items-center gap-1"
+                    className="text-xs font-medium text-blue-600 hover:underline disabled:opacity-50 flex items-center gap-1"
                   >
                     {isUpdatingRole ? <Loader2 className="w-3 h-3 animate-spin" /> : null}
                     Changer en {user?.role === 'admin' ? 'Utilisateur' : 'Admin'}

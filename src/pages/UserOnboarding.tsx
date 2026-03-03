@@ -52,10 +52,10 @@ export default function UserOnboarding() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#FDF7F1] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-sm border border-neutral-200 p-8">
         <div className="text-center mb-8">
-          <div className="w-10 h-10 bg-[#E8794A] rounded-xl mx-auto mb-4"></div>
+          <div className="w-10 h-10 bg-blue-600 rounded-xl mx-auto mb-4"></div>
           <h1 className="text-2xl font-bold text-neutral-900">Bienvenue sur Uprising Cofounder</h1>
           <p className="text-neutral-500 text-sm mt-2">Apprenons à nous connaître pour mieux vous accompagner.</p>
         </div>
@@ -68,7 +68,7 @@ export default function UserOnboarding() {
               required
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full px-4 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E8794A]/20 focus:border-[#E8794A]"
+              className="w-full px-4 py-2 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600"
               placeholder="Votre prénom"
             />
           </div>
@@ -81,7 +81,7 @@ export default function UserOnboarding() {
                   key={r}
                   type="button"
                   onClick={() => setRole(r)}
-                  className={`px-3 py-2 text-sm rounded-lg border text-left transition-colors ${role === r ? 'border-[#E8794A] bg-[#E8794A]/5 text-[#E8794A] font-medium' : 'border-neutral-200 text-neutral-600 hover:bg-neutral-50'}`}
+                  className={`px-3 py-2 text-sm rounded-lg border text-left transition-colors ${role === r ? 'border-blue-600 bg-blue-600/5 text-blue-600 font-medium' : 'border-neutral-200 text-neutral-600 hover:bg-neutral-50'}`}
                 >
                   {r}
                 </button>
@@ -97,7 +97,7 @@ export default function UserOnboarding() {
                   key={g}
                   type="button"
                   onClick={() => setGoal(g)}
-                  className={`w-full px-4 py-3 text-sm rounded-lg border text-left transition-colors ${goal === g ? 'border-[#E8794A] bg-[#E8794A]/5 text-[#E8794A] font-medium' : 'border-neutral-200 text-neutral-600 hover:bg-neutral-50'}`}
+                  className={`w-full px-4 py-3 text-sm rounded-lg border text-left transition-colors ${goal === g ? 'border-blue-600 bg-blue-600/5 text-blue-600 font-medium' : 'border-neutral-200 text-neutral-600 hover:bg-neutral-50'}`}
                 >
                   {g}
                 </button>
@@ -108,7 +108,7 @@ export default function UserOnboarding() {
           <button
             type="submit"
             disabled={!name || !role || !goal || loading}
-            className="w-full bg-[#E8794A] text-white rounded-lg py-3 font-medium hover:bg-[#d66a3d] transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-8 flex items-center justify-center gap-2"
+            className="w-full bg-blue-600 text-white rounded-lg py-3 font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-8 flex items-center justify-center gap-2"
           >
             {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : null}
             {loading ? "Enregistrement..." : "Commencer l'aventure"}
