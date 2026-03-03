@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Home as HomeIcon, Book, Settings, User, LogOut, Menu, X, Bell, Moon, Sun, Laptop, Key, ExternalLink, BarChart3, Users, TrendingUp, Activity, Zap } from "lucide-react";
+import { Home as HomeIcon, Book, Settings, User, LogOut, Menu, X, Bell, Moon, Sun, Laptop, Key, ExternalLink, BarChart3, Users, TrendingUp, Activity, Zap, Loader2, HelpCircle, Shield } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { useToast } from "../contexts/ToastContext";
 
@@ -22,6 +22,10 @@ export default function SettingsPage() {
   const [elevenLabsApiKey, setElevenLabsApiKey] = useState("");
   const [twentyApiKey, setTwentyApiKey] = useState("");
 
+  // Cookie Preferences
+  const [analyticsCookies, setAnalyticsCookies] = useState(false);
+  const [marketingCookies, setMarketingCookies] = useState(false);
+
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -36,7 +40,20 @@ export default function SettingsPage() {
       setElevenLabsApiKey(user.elevenlabs_api_key || "");
       setTwentyApiKey(user.twenty_api_key || "");
     }
+    
+    // Load cookie preferences
+    const storedAnalytics = localStorage.getItem('cookie_analytics');
+    const storedMarketing = localStorage.getItem('cookie_marketing');
+    setAnalyticsCookies(storedAnalytics === 'true');
+    setMarketingCookies(storedMarketing === 'true');
   }, [user]);
+
+  const handleSaveCookiePreferences = () => {
+    localStorage.setItem('cookie_analytics', String(analyticsCookies));
+    localStorage.setItem('cookie_marketing', String(marketingCookies));
+    localStorage.setItem('cookie_consent', 'custom');
+    addToast("Préférences de cookies mises à jour", "success");
+  };
 
   const handleSave = async () => {
     setLoading(true);
@@ -96,8 +113,8 @@ export default function SettingsPage() {
             <button onClick={() => navigate('/')} className="flex items-center gap-3 w-full px-3 py-2 text-neutral-600 hover:bg-neutral-200/50 rounded-lg text-sm font-medium">
               <HomeIcon className="w-4 h-4" /> Accueil
             </button>
-            <button onClick={() => navigate('/docs')} className="flex items-center gap-3 w-full px-3 py-2 text-neutral-600 hover:bg-neutral-200/50 rounded-lg text-sm font-medium">
-              <Book className="w-4 h-4" /> Docs
+            <button onClick={() => navigate('/help')} className="flex items-center gap-3 w-full px-3 py-2 text-neutral-600 hover:bg-neutral-200/50 rounded-lg text-sm font-medium">
+              <HelpCircle className="w-4 h-4" /> Aide & Tutoriels
             </button>
             {user?.role === 'admin' && (
               <button className="flex items-center gap-3 w-full px-3 py-2 bg-neutral-200/50 rounded-lg text-sm font-medium">
@@ -352,12 +369,70 @@ export default function SettingsPage() {
               </div>
             </div>
 
+            {/* Cookie Preferences */}
+            <div className="bg-white p-6 rounded-2xl border border-neutral-200 shadow-sm">
+              <h2 className="text-lg font-semibold text-neutral-900 mb-4 flex items-center gap-2">
+                <Shield className="w-5 h-5 text-neutral-500" /> Confidentialité & Cookies
+              </h2>
+              <p className="text-sm text-neutral-500 mb-6">
+                Gérez vos préférences en matière de cookies. Les cookies essentiels sont nécessaires au fonctionnement du site.
+              </p>
+              
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-neutral-800">Cookies Essentiels</p>
+                    <p className="text-xs text-neutral-500">Nécessaires pour l'authentification et la sécurité.</p>
+                  </div>
+                  <div className="w-11 h-6 bg-[#E8794A] rounded-full relative opacity-50 cursor-not-allowed">
+                    <div className="w-4 h-4 bg-white rounded-full absolute top-1 translate-x-6"></div>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-neutral-800">Cookies Analytiques</p>
+                    <p className="text-xs text-neutral-500">Nous aident à comprendre comment vous utilisez le site.</p>
+                  </div>
+                  <button 
+                    onClick={() => setAnalyticsCookies(!analyticsCookies)}
+                    className={`w-11 h-6 rounded-full relative transition-colors ${analyticsCookies ? 'bg-[#E8794A]' : 'bg-neutral-200'}`}
+                  >
+                    <div className={`w-4 h-4 bg-white rounded-full absolute top-1 transition-transform ${analyticsCookies ? 'translate-x-6' : 'translate-x-1'}`}></div>
+                  </button>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-neutral-800">Cookies Marketing</p>
+                    <p className="text-xs text-neutral-500">Utilisés pour vous proposer des contenus pertinents.</p>
+                  </div>
+                  <button 
+                    onClick={() => setMarketingCookies(!marketingCookies)}
+                    className={`w-11 h-6 rounded-full relative transition-colors ${marketingCookies ? 'bg-[#E8794A]' : 'bg-neutral-200'}`}
+                  >
+                    <div className={`w-4 h-4 bg-white rounded-full absolute top-1 transition-transform ${marketingCookies ? 'translate-x-6' : 'translate-x-1'}`}></div>
+                  </button>
+                </div>
+
+                <div className="pt-2 flex justify-end">
+                    <button 
+                        onClick={handleSaveCookiePreferences}
+                        className="text-sm text-[#E8794A] font-medium hover:underline"
+                    >
+                        Mettre à jour les préférences de cookies
+                    </button>
+                </div>
+              </div>
+            </div>
+
             <div className="flex justify-end pt-4">
               <button 
                 onClick={handleSave}
                 disabled={loading}
-                className="bg-[#E8794A] text-white px-6 py-2 rounded-lg font-medium hover:bg-[#d66a3d] transition-colors disabled:opacity-50"
+                className="bg-[#E8794A] text-white px-6 py-2 rounded-lg font-medium hover:bg-[#d66a3d] transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
               >
+                {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : null}
                 {loading ? "Sauvegarde..." : "Sauvegarder"}
               </button>
             </div>

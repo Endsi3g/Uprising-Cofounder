@@ -1,27 +1,34 @@
 import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import { Loader2 } from "lucide-react";
 
 export default function Onboarding() {
   const [hovered, setHovered] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const projectId = searchParams.get("projectId");
   const { token } = useAuth();
 
   const handleSelect = async (mode: "create" | "scale") => {
-    if (projectId) {
-      await fetch(`/api/projects/${projectId}`, {
-        method: "PUT",
-        headers: { 
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        },
-        body: JSON.stringify({ mode }),
-      });
-      navigate(`/project/${projectId}`);
-    } else {
-      navigate("/");
+    setLoading(true);
+    try {
+      if (projectId) {
+        await fetch(`/api/projects/${projectId}`, {
+          method: "PUT",
+          headers: { 
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({ mode }),
+        });
+        navigate(`/project/${projectId}`);
+      } else {
+        navigate("/");
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -41,13 +48,19 @@ export default function Onboarding() {
             onClick={() => handleSelect('create')}
             onMouseEnter={() => setHovered('create')}
             onMouseLeave={() => setHovered(null)}
+            disabled={loading}
             className={`
-              text-left p-7 rounded-2xl border-2 transition-all duration-200
+              text-left p-7 rounded-2xl border-2 transition-all duration-200 disabled:opacity-50 relative
               ${hovered === 'create' 
                 ? 'border-[#E8794A] shadow-[0_8px_30px_rgba(232,121,74,0.15)] bg-white' 
                 : 'border-neutral-100 bg-white shadow-[0_2px_12px_rgba(0,0,0,0.04)]'}
             `}
           >
+            {loading && hovered === 'create' && (
+              <div className="absolute inset-0 flex items-center justify-center bg-white/50 rounded-2xl z-10">
+                <Loader2 className="w-8 h-8 animate-spin text-[#E8794A]" />
+              </div>
+            )}
             <div className="text-3xl mb-4">🌱</div>
             <h2 className="text-lg font-semibold text-neutral-900 mb-2">
               Je n'ai pas encore d'entreprise
@@ -69,13 +82,19 @@ export default function Onboarding() {
             onClick={() => handleSelect('scale')}
             onMouseEnter={() => setHovered('scale')}
             onMouseLeave={() => setHovered(null)}
+            disabled={loading}
             className={`
-              text-left p-7 rounded-2xl border-2 transition-all duration-200
+              text-left p-7 rounded-2xl border-2 transition-all duration-200 disabled:opacity-50 relative
               ${hovered === 'scale' 
                 ? 'border-[#E8794A] shadow-[0_8px_30px_rgba(232,121,74,0.15)] bg-white' 
                 : 'border-neutral-100 bg-white shadow-[0_2px_12px_rgba(0,0,0,0.04)]'}
             `}
           >
+            {loading && hovered === 'scale' && (
+              <div className="absolute inset-0 flex items-center justify-center bg-white/50 rounded-2xl z-10">
+                <Loader2 className="w-8 h-8 animate-spin text-[#E8794A]" />
+              </div>
+            )}
             <div className="text-3xl mb-4">🚀</div>
             <h2 className="text-lg font-semibold text-neutral-900 mb-2">
               J'ai déjà une entreprise

@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { Loader2 } from 'lucide-react';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { login, user } = useAuth();
 
@@ -18,6 +20,7 @@ export default function Login() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setLoading(true);
     
     try {
       const res = await fetch('/api/auth/login', {
@@ -34,6 +37,8 @@ export default function Login() {
       navigate('/');
     } catch (err: any) {
       setError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -67,9 +72,11 @@ export default function Login() {
           </div>
           <button 
             type="submit"
-            className="w-full bg-[#E8794A] text-white rounded-lg py-2 font-medium hover:bg-[#d66b3d] transition-colors"
+            disabled={loading}
+            className="w-full bg-[#E8794A] text-white rounded-lg py-2 font-medium hover:bg-[#d66b3d] transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
           >
-            Se connecter
+            {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : null}
+            {loading ? "Connexion..." : "Se connecter"}
           </button>
         </form>
         

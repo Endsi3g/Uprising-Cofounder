@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import { Loader2 } from "lucide-react";
 
 export default function UserOnboarding() {
   const [name, setName] = useState("");
@@ -107,8 +108,9 @@ export default function UserOnboarding() {
           <button
             type="submit"
             disabled={!name || !role || !goal || loading}
-            className="w-full bg-[#E8794A] text-white rounded-lg py-3 font-medium hover:bg-[#d66a3d] transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-8"
+            className="w-full bg-[#E8794A] text-white rounded-lg py-3 font-medium hover:bg-[#d66a3d] transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-8 flex items-center justify-center gap-2"
           >
+            {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : null}
             {loading ? "Enregistrement..." : "Commencer l'aventure"}
           </button>
         </form>

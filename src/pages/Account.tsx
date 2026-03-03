@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Home as HomeIcon, Book, Settings, User, LogOut, Menu, X, Mail, Shield, CreditCard } from "lucide-react";
+import { Home as HomeIcon, Book, Settings, User, LogOut, Menu, X, Mail, Shield, CreditCard, Loader2, HelpCircle } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { useToast } from "../contexts/ToastContext";
 
@@ -9,6 +9,7 @@ export default function Account() {
   const { user, logout, token, updateUser } = useAuth();
   const { addToast } = useToast();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isUpdatingRole, setIsUpdatingRole] = useState(false);
 
   return (
     <div className="flex h-screen bg-[#FDF7F1]">
@@ -37,8 +38,8 @@ export default function Account() {
             <button onClick={() => navigate('/')} className="flex items-center gap-3 w-full px-3 py-2 text-neutral-600 hover:bg-neutral-200/50 rounded-lg text-sm font-medium">
               <HomeIcon className="w-4 h-4" /> Accueil
             </button>
-            <button onClick={() => navigate('/docs')} className="flex items-center gap-3 w-full px-3 py-2 text-neutral-600 hover:bg-neutral-200/50 rounded-lg text-sm font-medium">
-              <Book className="w-4 h-4" /> Docs
+            <button onClick={() => navigate('/help')} className="flex items-center gap-3 w-full px-3 py-2 text-neutral-600 hover:bg-neutral-200/50 rounded-lg text-sm font-medium">
+              <HelpCircle className="w-4 h-4" /> Aide & Tutoriels
             </button>
             {user?.role === 'admin' && (
               <button onClick={() => navigate('/settings')} className="flex items-center gap-3 w-full px-3 py-2 text-neutral-600 hover:bg-neutral-200/50 rounded-lg text-sm font-medium">
@@ -95,25 +96,32 @@ export default function Account() {
                   </div>
                   <button 
                     onClick={async () => {
-                      const newRole = user?.role === 'admin' ? 'user' : 'admin';
-                      const res = await fetch("/api/users/onboarding", {
-                        method: "PUT",
-                        headers: {
-                          "Content-Type": "application/json",
-                          "Authorization": `Bearer ${token}`
-                        },
-                        body: JSON.stringify({ role: newRole })
-                      });
-                      if (res.ok) {
-                        const data = await res.json();
-                        updateUser({ ...user!, role: newRole });
-                        addToast(`Vous êtes maintenant ${newRole === 'admin' ? 'Administrateur' : 'Utilisateur'}`, "success");
-                      } else {
-                        addToast("Erreur lors du changement de rôle", "error");
+                      setIsUpdatingRole(true);
+                      try {
+                        const newRole = user?.role === 'admin' ? 'user' : 'admin';
+                        const res = await fetch("/api/users/onboarding", {
+                          method: "PUT",
+                          headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${token}`
+                          },
+                          body: JSON.stringify({ role: newRole })
+                        });
+                        if (res.ok) {
+                          const data = await res.json();
+                          updateUser({ ...user!, role: newRole });
+                          addToast(`Vous êtes maintenant ${newRole === 'admin' ? 'Administrateur' : 'Utilisateur'}`, "success");
+                        } else {
+                          addToast("Erreur lors du changement de rôle", "error");
+                        }
+                      } finally {
+                        setIsUpdatingRole(false);
                       }
                     }}
-                    className="text-xs font-medium text-[#E8794A] hover:underline"
+                    disabled={isUpdatingRole}
+                    className="text-xs font-medium text-[#E8794A] hover:underline disabled:opacity-50 flex items-center gap-1"
                   >
+                    {isUpdatingRole ? <Loader2 className="w-3 h-3 animate-spin" /> : null}
                     Changer en {user?.role === 'admin' ? 'Utilisateur' : 'Admin'}
                   </button>
                 </div>

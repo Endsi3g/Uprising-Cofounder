@@ -8,7 +8,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import ResetPassword from "./pages/ResetPassword";
 import UserOnboarding from "./pages/UserOnboarding";
-import Docs from "./pages/Docs";
+import Help from "./pages/Help";
 import SettingsPage from "./pages/SettingsPage";
 import Account from "./pages/Account";
 import Welcome from "./pages/Welcome";
@@ -16,6 +16,7 @@ import FlashDemo from "./pages/FlashDemo";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { ToastProvider, useToast } from "./contexts/ToastContext";
 import PageTransition from "./components/PageTransition";
+import CookieConsentBanner from "./components/CookieConsentBanner";
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
@@ -58,7 +59,7 @@ const AnimatedRoutes = () => {
         switch (e.key.toLowerCase()) {
           case 'h':
             e.preventDefault();
-            navigate('/');
+            navigate('/help');
             break;
           case 'p':
             e.preventDefault();
@@ -66,7 +67,7 @@ const AnimatedRoutes = () => {
             break;
           case 'd':
             e.preventDefault();
-            navigate('/docs');
+            navigate('/help');
             break;
           case 's':
             e.preventDefault();
@@ -96,7 +97,7 @@ const AnimatedRoutes = () => {
         <Route path="/onboarding" element={<ProtectedRoute><PageTransition><Onboarding /></PageTransition></ProtectedRoute>} />
         <Route path="/user-onboarding" element={<ProtectedRoute><PageTransition><UserOnboarding /></PageTransition></ProtectedRoute>} />
         <Route path="/project/:id" element={<PageTransition><Project /></PageTransition>} />
-        <Route path="/docs" element={<ProtectedRoute><PageTransition><Docs /></PageTransition></ProtectedRoute>} />
+        <Route path="/help" element={<ProtectedRoute><PageTransition><Help /></PageTransition></ProtectedRoute>} />
         <Route path="/settings" element={<AdminRoute><PageTransition><SettingsPage /></PageTransition></AdminRoute>} />
         <Route path="/account" element={<ProtectedRoute><PageTransition><Account /></PageTransition></ProtectedRoute>} />
       </Routes>
@@ -110,6 +111,7 @@ export default function App() {
       <ToastProvider>
         <BrowserRouter>
           <AnimatedRoutes />
+          <CookieConsentBanner />
         </BrowserRouter>
       </ToastProvider>
     </AuthProvider>

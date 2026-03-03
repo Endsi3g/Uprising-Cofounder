@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus, Lightbulb, Settings, Home as HomeIcon, Share, User, LogOut, Menu, X, Book, Loader2, Clock, Zap, CreditCard, Building2, Rocket, FolderOpen, Trash2, Search, ArrowUpDown, Crown, Lock, Globe, LayoutGrid, ShoppingBag, Store, Smartphone, Briefcase } from "lucide-react";
+import { Plus, Lightbulb, Settings, Home as HomeIcon, Share, User, LogOut, Menu, X, Book, Loader2, Clock, Zap, CreditCard, Building2, Rocket, FolderOpen, Trash2, Search, ArrowUpDown, Crown, Lock, Globe, LayoutGrid, ShoppingBag, Store, Smartphone, Briefcase, HelpCircle } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { generateIdeas } from "../lib/gemini";
 import { TEMPLATES, Template } from "../constants/templates";
@@ -15,6 +15,7 @@ export default function Home() {
   const [businessType, setBusinessType] = useState<'startup' | 'traditional'>('startup');
   const [generatedIdeas, setGeneratedIdeas] = useState<{title: string, description: string, targetAudience?: string, businessModel?: string, marketOpportunity?: string, estimatedTime?: string, methods?: {free: string, paid: string}}[]>([]);
   const [isGeneratingIdeas, setIsGeneratingIdeas] = useState(false);
+  const [isCreatingProject, setIsCreatingProject] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<"date" | "name">("date");
   const [isPrivate, setIsPrivate] = useState(false);
@@ -36,6 +37,7 @@ export default function Home() {
   }, [token]);
 
   const handleStartProject = async (overrideIdea?: string, template?: Template) => {
+    setIsCreatingProject(true);
     const finalIdea = overrideIdea || idea;
     const projectName = template ? template.name : (finalIdea ? (finalIdea.slice(0, 30) + "...") : "Nouveau projet");
     const projectDescription = template ? template.description : (finalIdea || "Projet vide");
@@ -78,6 +80,8 @@ export default function Home() {
       navigate(`/project/${project.id}`);
     } catch (error) {
       console.error("Failed to create project", error);
+    } finally {
+      setIsCreatingProject(false);
     }
   };
 
@@ -148,10 +152,10 @@ export default function Home() {
               <HomeIcon className="w-4 h-4" /> Accueil
             </button>
             <button 
-              onClick={() => navigate('/docs')}
+              onClick={() => navigate('/help')}
               className="flex items-center gap-3 w-full px-3 py-2 text-neutral-600 hover:bg-neutral-200/50 rounded-lg text-sm font-medium"
             >
-              <Book className="w-4 h-4" /> Docs
+              <HelpCircle className="w-4 h-4" /> Aide & Tutoriels
             </button>
             {user?.role === 'admin' && (
               <button 
@@ -211,29 +215,37 @@ export default function Home() {
               <div className="flex bg-neutral-100 rounded-lg p-1 w-full sm:w-auto overflow-x-auto">
                 <button
                   onClick={() => setMode('create')}
-                  className={`flex-1 sm:flex-none px-3 py-1.5 text-sm font-medium rounded-md transition-colors whitespace-nowrap ${mode === 'create' ? 'bg-white text-neutral-900 shadow-sm' : 'text-neutral-500 hover:text-neutral-700'}`}
+                  disabled={isCreatingProject}
+                  className={`flex-1 sm:flex-none px-3 py-1.5 text-sm font-medium rounded-md transition-colors whitespace-nowrap disabled:opacity-50 ${mode === 'create' ? 'bg-white text-neutral-900 shadow-sm' : 'text-neutral-500 hover:text-neutral-700'}`}
                 >
                   🌱 Créer
                 </button>
                 <button
                   onClick={() => setMode('scale')}
-                  className={`flex-1 sm:flex-none px-3 py-1.5 text-sm font-medium rounded-md transition-colors whitespace-nowrap ${mode === 'scale' ? 'bg-white text-neutral-900 shadow-sm' : 'text-neutral-500 hover:text-neutral-700'}`}
+                  disabled={isCreatingProject}
+                  className={`flex-1 sm:flex-none px-3 py-1.5 text-sm font-medium rounded-md transition-colors whitespace-nowrap disabled:opacity-50 ${mode === 'scale' ? 'bg-white text-neutral-900 shadow-sm' : 'text-neutral-500 hover:text-neutral-700'}`}
                 >
                   🚀 Scaler
                 </button>
                 <button
                   onClick={() => setMode('analyse')}
-                  className={`flex-1 sm:flex-none px-3 py-1.5 text-sm font-medium rounded-md transition-colors whitespace-nowrap ${mode === 'analyse' ? 'bg-white text-neutral-900 shadow-sm' : 'text-neutral-500 hover:text-neutral-700'}`}
+                  disabled={isCreatingProject}
+                  className={`flex-1 sm:flex-none px-3 py-1.5 text-sm font-medium rounded-md transition-colors whitespace-nowrap disabled:opacity-50 ${mode === 'analyse' ? 'bg-white text-neutral-900 shadow-sm' : 'text-neutral-500 hover:text-neutral-700'}`}
                 >
                   🔍 Analyser
                 </button>
               </div>
               <button 
                 onClick={() => handleStartProject()}
-                className="bg-[#E8794A]/20 text-[#E8794A] hover:bg-[#E8794A] hover:text-white transition-colors rounded-full w-full sm:w-8 h-8 flex items-center justify-center"
+                disabled={isCreatingProject}
+                className="bg-[#E8794A]/20 text-[#E8794A] hover:bg-[#E8794A] hover:text-white transition-colors rounded-full w-full sm:w-8 h-8 flex items-center justify-center disabled:opacity-50"
               >
-                <span className="sm:hidden font-medium text-sm">Démarrer</span>
-                <span className="hidden sm:inline">↑</span>
+                {isCreatingProject ? <Loader2 className="w-4 h-4 animate-spin" /> : (
+                  <>
+                    <span className="sm:hidden font-medium text-sm">Démarrer</span>
+                    <span className="hidden sm:inline">↑</span>
+                  </>
+                )}
               </button>
             </div>
           </div>
@@ -243,9 +255,11 @@ export default function Home() {
             <div className="flex flex-wrap items-center justify-center gap-3 w-full sm:w-auto">
               <button 
                 onClick={() => handleStartProject()}
-                className="flex items-center gap-2 bg-white border border-neutral-200 text-neutral-700 rounded-full px-4 py-2 text-sm font-medium shadow-sm hover:bg-neutral-50"
+                disabled={isCreatingProject}
+                className="flex items-center gap-2 bg-white border border-neutral-200 text-neutral-700 rounded-full px-4 py-2 text-sm font-medium shadow-sm hover:bg-neutral-50 disabled:opacity-50"
               >
-                <span className="text-neutral-400">▷</span> Démarrer le projet
+                {isCreatingProject ? <Loader2 className="w-4 h-4 animate-spin" /> : <span className="text-neutral-400">▷</span>} 
+                {isCreatingProject ? "Création..." : "Démarrer le projet"}
               </button>
               <button 
                 onClick={() => setShowBrainstormModal(true)}
@@ -276,7 +290,8 @@ export default function Home() {
                 <button
                   key={template.id}
                   onClick={() => handleStartProject(undefined, template)}
-                  className="flex flex-col items-center gap-2 p-4 bg-white border border-neutral-200 rounded-2xl hover:border-[#E8794A] hover:shadow-md transition-all group text-center"
+                  disabled={isCreatingProject}
+                  className="flex flex-col items-center gap-2 p-4 bg-white border border-neutral-200 rounded-2xl hover:border-[#E8794A] hover:shadow-md transition-all group text-center disabled:opacity-50 disabled:hover:border-neutral-200 disabled:hover:shadow-none disabled:cursor-not-allowed"
                 >
                   <div className="w-10 h-10 bg-neutral-50 rounded-xl flex items-center justify-center group-hover:bg-[#E8794A]/10 transition-colors">
                     <template.icon className="w-5 h-5 text-neutral-400 group-hover:text-[#E8794A] transition-colors" />
@@ -447,7 +462,34 @@ export default function Home() {
                 </div>
               </div>
 
-              {generatedIdeas.length > 0 && (
+              {isGeneratingIdeas && (
+                <div className="space-y-4">
+                  <h3 className="text-sm font-medium text-neutral-500 uppercase tracking-wider">Génération en cours...</h3>
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="border border-neutral-200 rounded-xl p-4 animate-pulse">
+                      <div className="flex justify-between items-start mb-2">
+                        <div className="h-6 bg-neutral-200 rounded w-1/3"></div>
+                        <div className="h-6 bg-neutral-200 rounded-full w-24"></div>
+                      </div>
+                      <div className="space-y-2 mb-3">
+                        <div className="h-4 bg-neutral-200 rounded w-full"></div>
+                        <div className="h-4 bg-neutral-200 rounded w-5/6"></div>
+                      </div>
+                      <div className="flex gap-2 mt-2 mb-3">
+                        <div className="h-6 bg-neutral-200 rounded-md w-20"></div>
+                        <div className="h-6 bg-neutral-200 rounded-md w-24"></div>
+                        <div className="h-6 bg-neutral-200 rounded-md w-24"></div>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4 pt-4 border-t border-neutral-100">
+                        <div className="h-20 bg-neutral-200 rounded-lg"></div>
+                        <div className="h-20 bg-neutral-200 rounded-lg"></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {!isGeneratingIdeas && generatedIdeas.length > 0 && (
                 <div className="space-y-4">
                   <h3 className="text-sm font-medium text-neutral-500 uppercase tracking-wider">Idées générées</h3>
                   {generatedIdeas.map((idea, index) => (

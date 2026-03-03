@@ -1,17 +1,20 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { Loader2 } from 'lucide-react';
 
 export default function ResetPassword() {
   const [email, setEmail] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setSuccess('');
+    setLoading(true);
     
     try {
       const res = await fetch('/api/auth/reset-password', {
@@ -28,6 +31,8 @@ export default function ResetPassword() {
       setTimeout(() => navigate('/login'), 2000);
     } catch (err: any) {
       setError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -62,9 +67,11 @@ export default function ResetPassword() {
           </div>
           <button 
             type="submit"
-            className="w-full bg-[#E8794A] text-white rounded-lg py-2 font-medium hover:bg-[#d66b3d] transition-colors"
+            disabled={loading}
+            className="w-full bg-[#E8794A] text-white rounded-lg py-2 font-medium hover:bg-[#d66b3d] transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
           >
-            Réinitialiser
+            {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : null}
+            {loading ? "Réinitialisation..." : "Réinitialiser"}
           </button>
         </form>
         

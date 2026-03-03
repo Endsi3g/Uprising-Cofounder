@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback, memo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Draggable from "react-draggable";
 import Markdown from "react-markdown";
-import { ArrowUp, Maximize2, Edit3, List, Share, Download, MessageSquare, Search, Plus, Home as HomeIcon, Menu, X, Trash2, Send, Check, Crown, Grip, LayoutGrid, Lock, Globe, Keyboard, Gift } from "lucide-react";
+import { ArrowUp, Maximize2, Edit3, List, Share, Download, MessageSquare, Search, Plus, Home as HomeIcon, Menu, X, Trash2, Send, Check, Crown, Grip, LayoutGrid, Lock, Globe, Keyboard, Gift, Loader2 } from "lucide-react";
 import { analyzeIdea, chatWithCofounder, generatePitchDeck } from "../lib/gemini";
 import { useAuth } from "../contexts/AuthContext";
 import { useToast } from "../contexts/ToastContext";
@@ -136,6 +136,11 @@ const DraggableCard = memo(({
           <a href={card.content} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline break-all no-drag">
             {card.content}
           </a>
+        ) : card.content === "Génération en cours..." ? (
+          <div className="flex flex-col items-center justify-center py-6 text-neutral-400 gap-3">
+            <Loader2 className="w-6 h-6 animate-spin text-amber-500" />
+            <span className="text-sm font-medium animate-pulse">Génération en cours...</span>
+          </div>
         ) : (
           <div className="markdown-body prose prose-sm prose-neutral max-w-none">
             <Markdown>{card.content}</Markdown>
@@ -875,9 +880,9 @@ export default function Project() {
           )}
           
           {user && (
-            <button onClick={() => { handleGeneratePitchDeck(); setIsMobileMenuOpen(false); }} className="flex items-center gap-3 text-sm font-medium text-amber-600 p-2 hover:bg-amber-50 rounded-lg">
-              <Crown className="w-4 h-4" />
-              Générer Pitch Deck
+            <button onClick={() => { handleGeneratePitchDeck(); setIsMobileMenuOpen(false); }} disabled={loading} className="flex items-center gap-3 text-sm font-medium text-amber-600 p-2 hover:bg-amber-50 rounded-lg disabled:opacity-50 w-full text-left">
+              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Crown className="w-4 h-4" />}
+              {loading ? "Génération..." : "Générer Pitch Deck"}
             </button>
           )}
           
@@ -1002,6 +1007,14 @@ export default function Project() {
               )}
             </div>
           ))}
+          {loading && !messages.some(m => m.id === 'temp') && (
+            <div className="flex flex-col gap-2">
+              <div className="text-[15px] text-neutral-800 leading-relaxed flex items-center gap-2">
+                <Loader2 className="w-4 h-4 animate-spin text-neutral-500" />
+                <span className="text-neutral-500 italic">L'IA réfléchit...</span>
+              </div>
+            </div>
+          )}
           <div ref={messagesEndRef} />
         </div>
 
@@ -1050,7 +1063,7 @@ export default function Project() {
                   disabled={loading || (!input.trim() && !image)}
                   className="bg-[#dca896] text-white p-2 rounded-lg hover:bg-[#d09c8a] transition-colors disabled:opacity-50"
                 >
-                  <ArrowUp className="w-5 h-5" />
+                  {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <ArrowUp className="w-5 h-5" />}
                 </button>
               </div>
             </>
@@ -1134,9 +1147,9 @@ export default function Project() {
               </button>
             )}
             {user && (
-              <button onClick={handleGeneratePitchDeck} className="flex items-center gap-2 text-sm font-medium text-amber-600 bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-md hover:bg-amber-100 transition-colors">
-                <Crown className="w-4 h-4" />
-                Générer Pitch Deck
+              <button onClick={handleGeneratePitchDeck} disabled={loading} className="flex items-center gap-2 text-sm font-medium text-amber-600 bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-md hover:bg-amber-100 transition-colors disabled:opacity-50">
+                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Crown className="w-4 h-4" />}
+                {loading ? "Génération..." : "Générer Pitch Deck"}
               </button>
             )}
             {project.user_id === user?.id && (
