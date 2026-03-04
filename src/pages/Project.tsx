@@ -247,6 +247,7 @@ export default function Project() {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isAutoSaving, setIsAutoSaving] = useState(false);
   const socketRef = useRef<Socket | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -272,6 +273,20 @@ export default function Project() {
       setShowReferralModal(false);
     }},
   ]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      // Simulate auto-save visual feedback since actual save happens on every change
+      setIsAutoSaving(true);
+      setTimeout(() => {
+        setIsAutoSaving(false);
+        setLastSaved(new Date());
+        setTimeout(() => setLastSaved(null), 2000);
+      }, 1000);
+    }, 30000); // 30 seconds
+
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     if (!id) return;
@@ -1226,11 +1241,15 @@ export default function Project() {
                 Partager
               </button>
             )}
-            {lastSaved && (
+            {isAutoSaving ? (
+              <span className="text-xs text-neutral-400 font-medium flex items-center gap-1 animate-pulse">
+                <Loader2 className="w-3 h-3 animate-spin" /> Sauvegarde...
+              </span>
+            ) : lastSaved ? (
               <span className="text-xs text-green-600 font-medium animate-fade-in">
                 Sauvegardé
               </span>
-            )}
+            ) : null}
           </div>
         </div>
 

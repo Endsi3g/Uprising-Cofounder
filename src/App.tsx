@@ -11,6 +11,8 @@ import UserOnboarding from "./pages/UserOnboarding";
 import Help from "./pages/Help";
 import SettingsPage from "./pages/SettingsPage";
 import Account from "./pages/Account";
+import Documentation from "./pages/Documentation";
+import OurStory from "./pages/OurStory";
 import Welcome from "./pages/Welcome";
 import FlashDemo from "./pages/FlashDemo";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
@@ -100,6 +102,8 @@ const AnimatedRoutes = () => {
         <Route path="/help" element={<ProtectedRoute><PageTransition><Help /></PageTransition></ProtectedRoute>} />
         <Route path="/settings" element={<AdminRoute><PageTransition><SettingsPage /></PageTransition></AdminRoute>} />
         <Route path="/account" element={<ProtectedRoute><PageTransition><Account /></PageTransition></ProtectedRoute>} />
+        <Route path="/documentation" element={<PageTransition><Documentation /></PageTransition>} />
+        <Route path="/our-story" element={<PageTransition><OurStory /></PageTransition>} />
       </Routes>
     </AnimatePresence>
   );
