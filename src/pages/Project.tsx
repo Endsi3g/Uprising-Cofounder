@@ -251,8 +251,15 @@ export default function Project() {
   const socketRef = useRef<Socket | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const dirtyContentIds = useRef<Set<string>>(new Set());
+  const dirtyPositionIds = useRef<Set<string>>(new Set());
+  const cardsRef = useRef(cards);
   const { token, user } = useAuth();
   const { addToast } = useToast();
+
+  useEffect(() => {
+    cardsRef.current = cards;
+  }, [cards]);
 
   useKeyboardShortcuts([
     { combo: { key: 'n', altKey: true }, handler: () => handleAddCard() },
@@ -275,18 +282,81 @@ export default function Project() {
   ]);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      // Simulate auto-save visual feedback since actual save happens on every change
+    const saveChanges = async () => {
+      if (dirtyContentIds.current.size === 0 && dirtyPositionIds.current.size === 0) return;
+
       setIsAutoSaving(true);
-      setTimeout(() => {
-        setIsAutoSaving(false);
+      
+      const contentIds = Array.from(dirtyContentIds.current);
+      const positionIds = Array.from(dirtyPositionIds.current);
+      
+      dirtyContentIds.current.clear();
+      dirtyPositionIds.current.clear();
+
+      try {
+        const promises = [];
+
+        // Save content updates
+        for (const id of contentIds) {
+          const card = cardsRef.current.find(c => c.id === id);
+          if (card) {
+            promises.push(
+              fetch(`/api/cards/${id}`, {
+                method: "PUT",
+                headers: { 
+                  "Content-Type": "application/json",
+                  "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify({ title: card.title, content: card.content })
+              })
+            );
+          }
+        }
+
+        // Save position updates
+        for (const id of positionIds) {
+          const card = cardsRef.current.find(c => c.id === id);
+          if (card) {
+            promises.push(
+              fetch(`/api/cards/${id}/position`, {
+                method: "PUT",
+                headers: { 
+                  "Content-Type": "application/json",
+                  "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify({ position_x: card.position_x, position_y: card.position_y }),
+              })
+            );
+          }
+        }
+
+        await Promise.all(promises);
         setLastSaved(new Date());
         setTimeout(() => setLastSaved(null), 2000);
-      }, 1000);
-    }, 30000); // 30 seconds
+      } catch (error) {
+        console.error("Auto-save failed:", error);
+        addToast("Erreur lors de la sauvegarde automatique", "error");
+      } finally {
+        setIsAutoSaving(false);
+      }
+    };
 
-    return () => clearInterval(interval);
-  }, []);
+    const interval = setInterval(saveChanges, 30000); // 30 seconds
+
+    // Also save on unmount/page hide
+    const handleBeforeUnload = () => {
+      if (dirtyContentIds.current.size > 0 || dirtyPositionIds.current.size > 0) {
+        saveChanges();
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      saveChanges(); // Try to save on unmount
+    };
+  }, [token, addToast]);
 
   useEffect(() => {
     if (!id) return;
@@ -400,15 +470,8 @@ export default function Project() {
   const handleCardUpdate = useCallback(async (cardId: string, title: string, content: string) => {
     setCards(prev => prev.map(c => c.id === cardId ? { ...c, title, content } : c));
     socketRef.current?.emit("card-update", { projectId: id, cardId, title, content });
-    await fetch(`/api/cards/${cardId}`, {
-      method: "PUT",
-      headers: { 
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`
-      },
-      body: JSON.stringify({ title, content })
-    });
-  }, [id, token]);
+    dirtyContentIds.current.add(cardId);
+  }, [id]);
 
   const handleProjectPrivacyToggle = async () => {
     const newIsPrivate = project.is_private === 1 ? 0 : 1;
@@ -642,15 +705,8 @@ export default function Project() {
   const handleCardStop = useCallback(async (cardId: string, x: number, y: number) => {
     setCards(prev => prev.map(c => c.id === cardId ? { ...c, position_x: x, position_y: y } : c));
     socketRef.current?.emit("card-move", { projectId: id, cardId, x, y });
-    await fetch(`/api/cards/${cardId}/position`, {
-      method: "PUT",
-      headers: { 
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`
-      },
-      body: JSON.stringify({ position_x: x, position_y: y }),
-    });
-  }, [id, token]);
+    dirtyPositionIds.current.add(cardId);
+  }, [id]);
 
   const handleAddCard = async () => {
     const cardRes = await fetch(`/api/projects/${id}/cards`, {
