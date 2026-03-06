@@ -184,7 +184,8 @@ async function startServer() {
     cors: {
       origin: "*",
       methods: ["GET", "POST"]
-    }
+    },
+    maxHttpBufferSize: 5e7 // 50 MB
   });
   const PORT = 3000;
 

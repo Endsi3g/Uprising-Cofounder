@@ -63,6 +63,35 @@ export async function generateMarketAnalysis(projectContext: any) {
   return response.text || "Erreur lors de la génération de l'analyse de marché.";
 }
 
+export async function generateFinancialModel(projectContext: any) {
+  const ai = getAI();
+  const prompt = `Tu es un directeur financier (CFO) expert en modélisation financière pour les startups.
+  À partir du contexte du projet suivant (cartes du canvas), génère un modèle financier simplifié sur 3 ans en format Markdown.
+  Le modèle doit inclure :
+  1. Hypothèses clés : Prix de vente, coût d'acquisition client (CAC), taux de conversion, etc.
+  2. Projections de Revenus (Année 1, Année 2, Année 3) : Détaille les sources de revenus.
+  3. Structure des Coûts : Coûts fixes (salaires, loyer, tech) et coûts variables.
+  4. Rentabilité : Marge brute, EBITDA, et estimation du point mort (break-even).
+  5. Besoins en financement : Combien d'argent faut-il lever ou investir pour atteindre la rentabilité ?
+  
+  Utilise des tableaux Markdown pour présenter les chiffres clairement. Utilise la devise CAD ($).
+  Sois réaliste et conservateur dans tes estimations.
+
+  Contexte du projet :
+  ${JSON.stringify(projectContext)}
+  `;
+
+  const response = await ai.models.generateContent({
+    model: "gemini-3.1-pro-preview",
+    contents: prompt,
+    config: {
+      thinkingConfig: { thinkingLevel: ThinkingLevel.HIGH }
+    }
+  });
+
+  return response.text || "Erreur lors de la génération du modèle financier.";
+}
+
 export async function analyzeIdea(idea: string) {
   const ai = getAI();
   const system = `Tu es un analyste stratégique pour Uprising Cofounder. 

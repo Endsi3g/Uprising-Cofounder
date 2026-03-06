@@ -2,8 +2,8 @@ import React, { useState, useEffect, useRef, useCallback, memo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Draggable from "react-draggable";
 import Markdown from "react-markdown";
-import { ArrowUp, Maximize2, Edit3, List, Share, Download, MessageSquare, Search, Plus, Home as HomeIcon, Menu, X, Trash2, Send, Check, Crown, Grip, LayoutGrid, Lock, Globe, Keyboard, Gift, Loader2 } from "lucide-react";
-import { analyzeIdea, chatWithCofounder, generatePitchDeck, generateMarketAnalysis } from "../lib/gemini";
+import { ArrowUp, Maximize2, Edit3, List, Share, Download, MessageSquare, Search, Plus, Home as HomeIcon, Menu, X, Trash2, Send, Check, Crown, Grip, LayoutGrid, Lock, Globe, Keyboard, Gift, Loader2, Calculator } from "lucide-react";
+import { analyzeIdea, chatWithCofounder, generatePitchDeck, generateMarketAnalysis, generateFinancialModel } from "../lib/gemini";
 import { useAuth } from "../contexts/AuthContext";
 import { useToast } from "../contexts/ToastContext";
 import { useKeyboardShortcuts } from "../hooks/useKeyboardShortcuts";
@@ -98,29 +98,29 @@ const DraggableCard = memo(({
         ) : (
           <h3 className={`font-semibold text-sm leading-tight ${isTask ? 'text-blue-600' : 'text-neutral-800'}`}>{card.title}</h3>
         )}
-        <div className="flex gap-2 no-drag items-center">
+        <div className="flex gap-2 items-center">
           <div className="drag-handle cursor-grab active:cursor-grabbing text-neutral-300 hover:text-neutral-500 p-1 -m-1">
             <Grip className="w-3 h-3" />
           </div>
           <Send 
-            className="w-3 h-3 text-neutral-400 cursor-pointer hover:text-blue-600 transition-colors" 
+            className="w-3 h-3 text-neutral-400 cursor-pointer hover:text-blue-600 transition-colors no-drag" 
             onClick={(e) => { e.stopPropagation(); onSendToChat(`Référence à la carte "${card.title}":\n${card.content}`); }}
           />
           <MessageSquare 
-            className={`w-3 h-3 cursor-pointer transition-colors ${showComments ? 'text-blue-600' : 'text-neutral-400 hover:text-neutral-600'}`} 
+            className={`w-3 h-3 cursor-pointer transition-colors no-drag ${showComments ? 'text-blue-600' : 'text-neutral-400 hover:text-neutral-600'}`} 
             onClick={(e) => { e.stopPropagation(); setShowComments(!showComments); }}
           />
           {user && (
             <>
               {isEditing ? (
-                <Check className="w-3 h-3 text-green-500 cursor-pointer hover:text-green-600" onClick={(e) => { e.stopPropagation(); handleSaveEdit(); }} />
+                <Check className="w-3 h-3 text-green-500 cursor-pointer hover:text-green-600 no-drag" onClick={(e) => { e.stopPropagation(); handleSaveEdit(); }} />
               ) : (
-                <Edit3 className="w-3 h-3 text-neutral-400 cursor-pointer hover:text-neutral-600" onClick={(e) => { e.stopPropagation(); setIsEditing(true); }} />
+                <Edit3 className="w-3 h-3 text-neutral-400 cursor-pointer hover:text-neutral-600 no-drag" onClick={(e) => { e.stopPropagation(); setIsEditing(true); }} />
               )}
-              <Trash2 className="w-3 h-3 text-red-400 cursor-pointer hover:text-red-600" onClick={(e) => { e.stopPropagation(); onDelete(card.id); }} />
+              <Trash2 className="w-3 h-3 text-red-400 cursor-pointer hover:text-red-600 no-drag" onClick={(e) => { e.stopPropagation(); onDelete(card.id); }} />
             </>
           )}
-          <Maximize2 className="w-3 h-3 text-neutral-400 cursor-pointer hover:text-neutral-600" onClick={(e) => { e.stopPropagation(); setIsMaximized(!isMaximized); }} />
+          <Maximize2 className="w-3 h-3 text-neutral-400 cursor-pointer hover:text-neutral-600 no-drag" onClick={(e) => { e.stopPropagation(); setIsMaximized(!isMaximized); }} />
         </div>
       </div>
       <div className={`text-neutral-500 text-xs leading-relaxed ${isMaximized ? 'flex-1' : ''}`}>
@@ -604,6 +604,50 @@ export default function Project() {
     }
   };
 
+  const handleGenerateFinancialModel = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/projects/${id}/cards`, {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ 
+          title: "Modèle Financier", 
+          content: "Génération en cours...", 
+          position_x: 150, 
+          position_y: 150 
+        }),
+      });
+      const cardData = await res.json();
+      setCards(prev => [...prev, cardData]);
+      
+      // Call Gemini to generate Financial Model
+      const financialContent = await generateFinancialModel(cards);
+      await handleCardUpdate(cardData.id, "Modèle Financier (Projections sur 3 ans)", financialContent);
+      
+      // Also send a message to chat
+      const assistantMsgRes = await fetch(`/api/projects/${id}/messages`, {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ role: "assistant", content: "J'ai généré un modèle financier simplifié sur 3 ans basé sur votre canvas. Vous le trouverez sur le canvas." }),
+      });
+      const assistantMsgData = await assistantMsgRes.json();
+      setMessages(prev => [...prev, assistantMsgData]);
+      socketRef.current?.emit("chat-message", { projectId: id, message: assistantMsgData });
+      
+    } catch (error) {
+      console.error(error);
+      addToast("Erreur lors de la génération du modèle financier.", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleCanvasMouseDown = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
       setIsPanning(true);
@@ -1007,6 +1051,13 @@ export default function Project() {
               {loading ? "Génération..." : "Générer Pitch Deck"}
             </button>
           )}
+
+          {user && (
+            <button onClick={() => { handleGenerateFinancialModel(); setIsMobileMenuOpen(false); }} disabled={loading} className="flex items-center gap-3 text-sm font-medium text-emerald-600 p-2 hover:bg-emerald-50 rounded-lg disabled:opacity-50 w-full text-left">
+              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Calculator className="w-4 h-4" />}
+              {loading ? "Génération..." : "Modèle Financier"}
+            </button>
+          )}
           
           {project.user_id === user?.id && (
             <button 
@@ -1278,6 +1329,12 @@ export default function Project() {
               <button onClick={handleGeneratePitchDeck} disabled={loading} className="flex items-center gap-2 text-sm font-medium text-amber-600 bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-md hover:bg-amber-100 transition-colors disabled:opacity-50">
                 {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Crown className="w-4 h-4" />}
                 {loading ? "Génération..." : "Générer Pitch Deck"}
+              </button>
+            )}
+            {user && (
+              <button onClick={handleGenerateFinancialModel} disabled={loading} className="flex items-center gap-2 text-sm font-medium text-emerald-600 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-md hover:bg-emerald-100 transition-colors disabled:opacity-50">
+                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Calculator className="w-4 h-4" />}
+                {loading ? "Génération..." : "Modèle Financier"}
               </button>
             )}
             {project.user_id === user?.id && (
