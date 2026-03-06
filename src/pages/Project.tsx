@@ -12,17 +12,17 @@ import JSZip from "jszip";
 import { jsPDF } from "jspdf";
 import { io, Socket } from "socket.io-client";
 
-const DraggableCard = memo(({ 
-  card, 
-  onDrag, 
+const DraggableCard = memo(({
+  card,
+  onDrag,
   onStop,
   onDelete,
   onUpdate,
   onSendToChat,
   zoom
 }: {
-  card: any, 
-  onDrag: (id: string, x: number, y: number) => void, 
+  card: any,
+  onDrag: (id: string, x: number, y: number) => void,
   onStop: (id: string, x: number, y: number) => void,
   onDelete: (id: string) => void,
   onUpdate: (id: string, title: string, content: string) => void,
@@ -60,7 +60,7 @@ const DraggableCard = memo(({
   const handleAddComment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newComment.trim() || !token) return;
-    
+
     const res = await fetch(`/api/cards/${card.id}/comments`, {
       method: "POST",
       headers: {
@@ -69,7 +69,7 @@ const DraggableCard = memo(({
       },
       body: JSON.stringify({ content: newComment })
     });
-    
+
     if (res.ok) {
       const comment = await res.json();
       setComments(prev => [...prev, comment]);
@@ -88,10 +88,10 @@ const DraggableCard = memo(({
     <div className={`bg-white rounded-xl border ${isTask ? 'border-blue-400 shadow-[0_4px_20px_rgba(37,99,235,0.15)]' : 'border-neutral-200 shadow-[0_4px_20px_rgba(0,0,0,0.08)]'} p-5 transition-all duration-200 ease-out ${isMaximized ? 'w-[600px] max-w-[95vw] h-[80vh] overflow-y-auto flex flex-col' : 'w-[280px] max-w-[85vw] hover:border-neutral-300'}`} style={{ willChange: 'transform, opacity' }}>
       <div className="flex justify-between items-start mb-3">
         {isEditing ? (
-          <input 
-            type="text" 
-            value={editTitle} 
-            onChange={e => setEditTitle(e.target.value)} 
+          <input
+            type="text"
+            value={editTitle}
+            onChange={e => setEditTitle(e.target.value)}
             className="font-semibold text-neutral-800 text-sm leading-tight border-b border-neutral-300 outline-none w-full mr-2 no-drag"
             autoFocus
           />
@@ -102,12 +102,12 @@ const DraggableCard = memo(({
           <div className="drag-handle cursor-grab active:cursor-grabbing text-neutral-300 hover:text-neutral-500 p-1 -m-1">
             <Grip className="w-3 h-3" />
           </div>
-          <Send 
-            className="w-3 h-3 text-neutral-400 cursor-pointer hover:text-blue-600 transition-colors no-drag" 
+          <Send
+            className="w-3 h-3 text-neutral-400 cursor-pointer hover:text-blue-600 transition-colors no-drag"
             onClick={(e) => { e.stopPropagation(); onSendToChat(`Référence à la carte "${card.title}":\n${card.content}`); }}
           />
-          <MessageSquare 
-            className={`w-3 h-3 cursor-pointer transition-colors no-drag ${showComments ? 'text-blue-600' : 'text-neutral-400 hover:text-neutral-600'}`} 
+          <MessageSquare
+            className={`w-3 h-3 cursor-pointer transition-colors no-drag ${showComments ? 'text-blue-600' : 'text-neutral-400 hover:text-neutral-600'}`}
             onClick={(e) => { e.stopPropagation(); setShowComments(!showComments); }}
           />
           {user && (
@@ -125,9 +125,9 @@ const DraggableCard = memo(({
       </div>
       <div className={`text-neutral-500 text-xs leading-relaxed ${isMaximized ? 'flex-1' : ''}`}>
         {isEditing && !isImage ? (
-          <textarea 
-            value={editContent} 
-            onChange={e => setEditContent(e.target.value)} 
+          <textarea
+            value={editContent}
+            onChange={e => setEditContent(e.target.value)}
             className="w-full h-32 border border-neutral-200 rounded p-2 outline-none resize-none no-drag"
           />
         ) : isImage ? (
@@ -173,7 +173,7 @@ const DraggableCard = memo(({
               placeholder="Ajouter un commentaire..."
               className="flex-1 text-xs border border-neutral-200 rounded-md px-2 py-1.5 focus:outline-none focus:border-blue-600"
             />
-            <button 
+            <button
               type="submit"
               disabled={!newComment.trim()}
               className="bg-neutral-800 text-white px-2 py-1.5 rounded-md text-xs disabled:opacity-50"
@@ -213,11 +213,11 @@ const DraggableCard = memo(({
   );
 }, (prevProps, nextProps) => {
   return prevProps.card.id === nextProps.card.id &&
-         prevProps.card.position_x === nextProps.card.position_x &&
-         prevProps.card.position_y === nextProps.card.position_y &&
-         prevProps.card.title === nextProps.card.title &&
-         prevProps.card.content === nextProps.card.content &&
-         prevProps.zoom === nextProps.zoom;
+    prevProps.card.position_x === nextProps.card.position_x &&
+    prevProps.card.position_y === nextProps.card.position_y &&
+    prevProps.card.title === nextProps.card.title &&
+    prevProps.card.content === nextProps.card.content &&
+    prevProps.zoom === nextProps.zoom;
 });
 
 DraggableCard.displayName = 'DraggableCard';
@@ -263,22 +263,26 @@ export default function Project() {
 
   useKeyboardShortcuts([
     { combo: { key: 'n', altKey: true }, handler: () => handleAddCard() },
-    { combo: { key: 's', ctrlKey: true }, handler: (e) => { 
-      e.preventDefault(); 
-      setLastSaved(new Date());
-      // Visual feedback for save (autosave is already active)
-      setTimeout(() => setLastSaved(null), 2000);
-    }},
+    {
+      combo: { key: 's', ctrlKey: true }, handler: (e) => {
+        e.preventDefault();
+        setLastSaved(new Date());
+        // Visual feedback for save (autosave is already active)
+        setTimeout(() => setLastSaved(null), 2000);
+      }
+    },
     { combo: { key: 'c', altKey: true }, handler: () => setIsChatOpen(prev => !prev) },
     { combo: { key: '/', altKey: true }, handler: () => setShowShortcutsModal(true) },
-    { combo: { key: 'Escape' }, handler: () => { 
-      setIsChatOpen(false); 
-      setShowAddMenu(false); 
-      setShowExportModal(false); 
-      setShowShareModal(false);
-      setShowShortcutsModal(false);
-      setShowReferralModal(false);
-    }},
+    {
+      combo: { key: 'Escape' }, handler: () => {
+        setIsChatOpen(false);
+        setShowAddMenu(false);
+        setShowExportModal(false);
+        setShowShareModal(false);
+        setShowShortcutsModal(false);
+        setShowReferralModal(false);
+      }
+    },
   ]);
 
   useEffect(() => {
@@ -286,10 +290,10 @@ export default function Project() {
       if (dirtyContentIds.current.size === 0 && dirtyPositionIds.current.size === 0) return;
 
       setIsAutoSaving(true);
-      
+
       const contentIds = Array.from(dirtyContentIds.current);
       const positionIds = Array.from(dirtyPositionIds.current);
-      
+
       dirtyContentIds.current.clear();
       dirtyPositionIds.current.clear();
 
@@ -303,7 +307,7 @@ export default function Project() {
             promises.push(
               fetch(`/api/cards/${id}`, {
                 method: "PUT",
-                headers: { 
+                headers: {
                   "Content-Type": "application/json",
                   "Authorization": `Bearer ${token}`
                 },
@@ -320,7 +324,7 @@ export default function Project() {
             promises.push(
               fetch(`/api/cards/${id}/position`, {
                 method: "PUT",
-                headers: { 
+                headers: {
                   "Content-Type": "application/json",
                   "Authorization": `Bearer ${token}`
                 },
@@ -413,20 +417,20 @@ export default function Project() {
 
     cards.forEach((card, index) => {
       const safeTitle = card.title.replace(/[^a-z0-9]/gi, '_').toLowerCase() || `card_${index}`;
-      
+
       // Add Markdown
       mdFolder?.file(`${safeTitle}.md`, `# ${card.title}\n\n${card.content}`);
-      
+
       // Add PDF
       const doc = new jsPDF();
       doc.setFontSize(16);
       doc.text(card.title, 10, 20);
       doc.setFontSize(12);
-      
+
       // Simple text wrapping for PDF
       const splitText = doc.splitTextToSize(card.content || "", 180);
       doc.text(splitText, 10, 30);
-      
+
       const pdfOutput = doc.output("blob");
       pdfFolder?.file(`${safeTitle}.pdf`, pdfOutput);
     });
@@ -440,7 +444,7 @@ export default function Project() {
     a.click();
     window.URL.revokeObjectURL(url);
     document.body.removeChild(a);
-    
+
     setShowExportModal(false);
   };
 
@@ -452,10 +456,10 @@ export default function Project() {
 
   const handleCardDelete = useCallback(async (cardId: string) => {
     if (!confirm("Voulez-vous vraiment supprimer cette carte ?")) return;
-    
+
     setCards(prev => prev.filter(c => c.id !== cardId));
     socketRef.current?.emit("card-delete", { projectId: id, cardId });
-    
+
     try {
       await fetch(`/api/cards/${cardId}`, {
         method: "DELETE",
@@ -476,10 +480,10 @@ export default function Project() {
   const handleProjectPrivacyToggle = async () => {
     const newIsPrivate = project.is_private === 1 ? 0 : 1;
     setProject(prev => ({ ...prev, is_private: newIsPrivate }));
-    
+
     await fetch(`/api/projects/${id}`, {
       method: "PUT",
-      headers: { 
+      headers: {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${token}`
       },
@@ -493,14 +497,14 @@ export default function Project() {
       setEditProjectName(project.name);
       return;
     }
-    
+
     setProject(prev => ({ ...prev, name: editProjectName }));
     setIsEditingProjectName(false);
     socketRef.current?.emit("project-update", { projectId: id, name: editProjectName, mode: project.mode });
-    
+
     await fetch(`/api/projects/${id}`, {
       method: "PUT",
-      headers: { 
+      headers: {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${token}`
       },
@@ -535,24 +539,24 @@ export default function Project() {
     try {
       const res = await fetch(`/api/projects/${id}/cards`, {
         method: "POST",
-        headers: { 
+        headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${token}`
         },
-        body: JSON.stringify({ 
-          title: "Pitch Deck Généré", 
-          content: "Génération en cours...", 
-          position_x: 50, 
-          position_y: 50 
+        body: JSON.stringify({
+          title: "Pitch Deck Généré",
+          content: "Génération en cours...",
+          position_x: 50,
+          position_y: 50
         }),
       });
       const cardData = await res.json();
       setCards(prev => [...prev, cardData]);
-      
+
       // Call Gemini to generate Pitch Deck
       const pitchDeckContent = await generatePitchDeck(cards);
       await handleCardUpdate(cardData.id, "Pitch Deck", pitchDeckContent);
-      
+
     } catch (error) {
       console.error(error);
     } finally {
@@ -565,28 +569,28 @@ export default function Project() {
     try {
       const res = await fetch(`/api/projects/${id}/cards`, {
         method: "POST",
-        headers: { 
+        headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${token}`
         },
-        body: JSON.stringify({ 
-          title: "Analyse de Marché", 
-          content: "Génération en cours...", 
-          position_x: 100, 
-          position_y: 100 
+        body: JSON.stringify({
+          title: "Analyse de Marché",
+          content: "Génération en cours...",
+          position_x: 100,
+          position_y: 100
         }),
       });
       const cardData = await res.json();
       setCards(prev => [...prev, cardData]);
-      
+
       // Call Gemini to generate Market Analysis
       const analysisContent = await generateMarketAnalysis(cards);
       await handleCardUpdate(cardData.id, "Analyse de Marché (TAM/SAM/SOM & Concurrents)", analysisContent);
-      
+
       // Also send a message to chat
       const assistantMsgRes = await fetch(`/api/projects/${id}/messages`, {
         method: "POST",
-        headers: { 
+        headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${token}`
         },
@@ -595,7 +599,7 @@ export default function Project() {
       const assistantMsgData = await assistantMsgRes.json();
       setMessages(prev => [...prev, assistantMsgData]);
       socketRef.current?.emit("chat-message", { projectId: id, message: assistantMsgData });
-      
+
     } catch (error) {
       console.error(error);
       addToast("Erreur lors de la génération de l'analyse de marché.", "error");
@@ -609,28 +613,28 @@ export default function Project() {
     try {
       const res = await fetch(`/api/projects/${id}/cards`, {
         method: "POST",
-        headers: { 
+        headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${token}`
         },
-        body: JSON.stringify({ 
-          title: "Modèle Financier", 
-          content: "Génération en cours...", 
-          position_x: 150, 
-          position_y: 150 
+        body: JSON.stringify({
+          title: "Modèle Financier",
+          content: "Génération en cours...",
+          position_x: 150,
+          position_y: 150
         }),
       });
       const cardData = await res.json();
       setCards(prev => [...prev, cardData]);
-      
+
       // Call Gemini to generate Financial Model
       const financialContent = await generateFinancialModel(cards);
       await handleCardUpdate(cardData.id, "Modèle Financier (Projections sur 3 ans)", financialContent);
-      
+
       // Also send a message to chat
       const assistantMsgRes = await fetch(`/api/projects/${id}/messages`, {
         method: "POST",
-        headers: { 
+        headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${token}`
         },
@@ -639,7 +643,7 @@ export default function Project() {
       const assistantMsgData = await assistantMsgRes.json();
       setMessages(prev => [...prev, assistantMsgData]);
       socketRef.current?.emit("chat-message", { projectId: id, message: assistantMsgData });
-      
+
     } catch (error) {
       console.error(error);
       addToast("Erreur lors de la génération du modèle financier.", "error");
@@ -703,7 +707,7 @@ export default function Project() {
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
     }
-    
+
     Promise.all([
       fetch(`/api/projects/${id}`, { headers }).then(res => {
         if (!res.ok) throw new Error("Not found or access denied");
@@ -711,10 +715,10 @@ export default function Project() {
       }),
       fetch(`/api/projects/${id}/cards`, { headers }).then(res => res.json()),
       fetch(`/api/projects/${id}/messages`, { headers }).then(res => res.json())
-    ]).then(([proj, crds, msgs]) => {
+    ]).then(([proj, crds, msgsData]) => {
       setProject(proj);
       setCards(crds);
-      setMessages(msgs);
+      setMessages(msgsData.messages || msgsData);
       setIsInitialLoad(false);
     }).catch(err => {
       console.error(err);
@@ -755,15 +759,15 @@ export default function Project() {
   const handleAddCard = async () => {
     const cardRes = await fetch(`/api/projects/${id}/cards`, {
       method: "POST",
-      headers: { 
+      headers: {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${token}`
       },
-      body: JSON.stringify({ 
-        title: "Nouvelle carte", 
-        content: "Ceci est une nouvelle carte.", 
-        position_x: Math.random() * 200 + 50, 
-        position_y: Math.random() * 200 + 50 
+      body: JSON.stringify({
+        title: "Nouvelle carte",
+        content: "Ceci est une nouvelle carte.",
+        position_x: Math.random() * 200 + 50,
+        position_y: Math.random() * 200 + 50
       }),
     });
     const cardData = await cardRes.json();
@@ -775,12 +779,12 @@ export default function Project() {
     const userMsg = overrideInput || input;
     const userImg = image;
     if ((!userMsg.trim() && !userImg) || loading) return;
-    
+
     if (!overrideInput) setInput("");
     setImage(null);
     setLoading(true);
 
-    const headers = { 
+    const headers = {
       "Content-Type": "application/json",
       "Authorization": `Bearer ${token}`
     };
@@ -798,7 +802,7 @@ export default function Project() {
     // Check if it's a research request
     if (!isInitial && (userMsg.toLowerCase().includes("recherche") || userMsg.toLowerCase().includes("analyse"))) {
       const analysis = await analyzeIdea(userMsg);
-      
+
       const assistantMsgRes = await fetch(`/api/projects/${id}/messages`, {
         method: "POST",
         headers,
@@ -823,11 +827,11 @@ export default function Project() {
       // Normal chat
       const chatMessages = [...messages, userMsgData].map(m => ({ role: m.role, content: m.content, image: m.image }));
       const stream = await chatWithCofounder(chatMessages, { ...project, cards });
-      
+
       let fullContent = "";
       // Add a temporary message
       setMessages(prev => [...prev, { id: 'temp', role: 'assistant', content: '' }]);
-      
+
       for await (const chunk of stream) {
         fullContent += chunk.text;
         let displayContent = fullContent.replace(/\[CREATE_CARD:\s*(\{.*?\})\s*\]/g, '');
@@ -868,11 +872,11 @@ export default function Project() {
         const cardRes = await fetch(`/api/projects/${id}/cards`, {
           method: "POST",
           headers,
-          body: JSON.stringify({ 
-            title: card.title, 
-            content: card.content, 
-            position_x: currentX, 
-            position_y: currentY 
+          body: JSON.stringify({
+            title: card.title,
+            content: card.content,
+            position_x: currentX,
+            position_y: currentY
           }),
         });
         const cardData = await cardRes.json();
@@ -895,12 +899,12 @@ export default function Project() {
         body: JSON.stringify({ role: "assistant", content: displayContent }),
       });
       const assistantMsgData = await assistantMsgRes.json();
-      
+
       // Add delete suggestions to message object locally for rendering
       if (deleteSuggestions.length > 0) {
         assistantMsgData.deleteSuggestions = deleteSuggestions;
       }
-      
+
       setMessages(prev => prev.map(m => m.id === 'temp' ? assistantMsgData : m));
       socketRef.current?.emit("chat-message", { projectId: id, message: assistantMsgData });
     }
@@ -925,20 +929,20 @@ export default function Project() {
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
-    
+
     const file = e.dataTransfer.files?.[0];
     if (file && file.type.startsWith('image/')) {
       const reader = new FileReader();
       reader.onloadend = async () => {
         const cardRes = await fetch(`/api/projects/${id}/cards`, {
           method: "POST",
-          headers: { 
+          headers: {
             "Content-Type": "application/json",
             "Authorization": `Bearer ${token}`
           },
-          body: JSON.stringify({ 
-            title: "Image", 
-            content: reader.result as string, 
+          body: JSON.stringify({
+            title: "Image",
+            content: reader.result as string,
             position_x: Math.max(0, x - 140), // Center roughly
             position_y: Math.max(0, y - 100)
           }),
@@ -953,14 +957,14 @@ export default function Project() {
       if (text) {
         const cardRes = await fetch(`/api/projects/${id}/cards`, {
           method: "POST",
-          headers: { 
+          headers: {
             "Content-Type": "application/json",
             "Authorization": `Bearer ${token}`
           },
-          body: JSON.stringify({ 
-            title: text.startsWith('http') ? "Lien" : "Note", 
-            content: text, 
-            position_x: Math.max(0, x - 140), 
+          body: JSON.stringify({
+            title: text.startsWith('http') ? "Lien" : "Note",
+            content: text,
+            position_x: Math.max(0, x - 140),
             position_y: Math.max(0, y - 100)
           }),
         });
@@ -1028,23 +1032,23 @@ export default function Project() {
               </div>
             )}
           </div>
-          
+
           <div className="h-px bg-neutral-100 my-1" />
-          
+
           {user && (
             <button onClick={() => { handleAutoLayout(); setIsMobileMenuOpen(false); }} className="flex items-center gap-3 text-sm font-medium text-neutral-600 p-2 hover:bg-neutral-50 rounded-lg">
               <LayoutGrid className="w-4 h-4" />
               Trier les cartes
             </button>
           )}
-          
+
           {user && (
             <button onClick={() => { handleGenerateMarketAnalysis(); setIsMobileMenuOpen(false); }} disabled={loading} className="flex items-center gap-3 text-sm font-medium text-indigo-600 p-2 hover:bg-indigo-50 rounded-lg disabled:opacity-50 w-full text-left">
               {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
               {loading ? "Analyse..." : "Analyse de Marché"}
             </button>
           )}
-          
+
           {user && (
             <button onClick={() => { handleGeneratePitchDeck(); setIsMobileMenuOpen(false); }} disabled={loading} className="flex items-center gap-3 text-sm font-medium text-amber-600 p-2 hover:bg-amber-50 rounded-lg disabled:opacity-50 w-full text-left">
               {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Crown className="w-4 h-4" />}
@@ -1058,9 +1062,9 @@ export default function Project() {
               {loading ? "Génération..." : "Modèle Financier"}
             </button>
           )}
-          
+
           {project.user_id === user?.id && (
-            <button 
+            <button
               onClick={() => { setShowReferralModal(true); setIsMobileMenuOpen(false); }}
               className="flex items-center gap-3 text-sm font-medium text-blue-600 p-2 hover:bg-blue-50 rounded-lg"
             >
@@ -1068,12 +1072,12 @@ export default function Project() {
               Offre Agence
             </button>
           )}
-          
+
           <button onClick={() => { setShowExportModal(true); setIsMobileMenuOpen(false); }} className="flex items-center gap-3 text-sm font-medium text-neutral-600 p-2 hover:bg-neutral-50 rounded-lg">
             <Download className="w-4 h-4" />
             Exporter
           </button>
-          
+
           {project.user_id === user?.id && (
             <button onClick={() => { handleShare(); setIsMobileMenuOpen(false); }} className="flex items-center gap-3 text-sm font-medium text-neutral-600 p-2 hover:bg-neutral-50 rounded-lg">
               <Share className="w-4 h-4" />
@@ -1084,7 +1088,7 @@ export default function Project() {
       )}
 
       {/* Left Sidebar - Chat */}
-      <div 
+      <div
         className={`
           absolute md:static inset-y-0 left-0 z-40 w-full md:w-[320px] bg-slate-50 border-r border-neutral-200 flex flex-col shadow-sm transition-transform duration-300 ease-in-out
           ${isChatOpen ? 'translate-x-0 pt-14 md:pt-0' : '-translate-x-full md:translate-x-0'}
@@ -1115,7 +1119,7 @@ export default function Project() {
             </button>
           </div>
         </div>
-        
+
         <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-slate-50 custom-scrollbar">
           {messages.map((m) => (
             <div key={m.id} className="flex flex-col gap-2">
@@ -1132,7 +1136,7 @@ export default function Project() {
                       <p className="text-xs text-red-800 font-medium mb-1">💡 Suggestion de suppression</p>
                       <p className="text-xs text-red-600 mb-2">{sugg.reason}</p>
                       <div className="flex gap-2">
-                        <button 
+                        <button
                           onClick={() => {
                             handleCardDelete(sugg.id);
                             // Remove suggestion from UI
@@ -1142,7 +1146,7 @@ export default function Project() {
                         >
                           Accepter
                         </button>
-                        <button 
+                        <button
                           onClick={() => {
                             setMessages(prev => prev.map(msg => msg.id === m.id ? { ...msg, deleteSuggestions: msg.deleteSuggestions.filter((_: any, idx: number) => idx !== i) } : msg));
                           }}
@@ -1161,17 +1165,17 @@ export default function Project() {
                       {m.content}
                     </div>
                     <div className="absolute top-4 right-4 w-7 h-7 bg-white rounded-full flex items-center justify-center shadow-sm overflow-hidden border border-neutral-200">
-                       <img src="/logo.png" alt="Avatar" className="w-5 h-5 object-contain" onError={(e) => { e.currentTarget.style.display = 'none'; (e.currentTarget.nextElementSibling as HTMLElement).style.display = 'flex'; }} />
-                       <div className="hidden w-full h-full items-center justify-center text-[10px] font-bold text-blue-600 bg-white">US</div>
+                      <img src="/logo.png" alt="Avatar" className="w-5 h-5 object-contain" onError={(e) => { e.currentTarget.style.display = 'none'; (e.currentTarget.nextElementSibling as HTMLElement).style.display = 'flex'; }} />
+                      <div className="hidden w-full h-full items-center justify-center text-[10px] font-bold text-blue-600 bg-white">US</div>
                     </div>
                   </div>
                   <div className="flex items-center gap-1.5 mt-3 text-[13px] text-neutral-500 self-start ml-2">
                     <div className="flex -space-x-1">
                       <div className="border border-neutral-300 bg-white rounded px-1 py-0.5 z-10">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" /><polyline points="14 2 14 8 20 8" /></svg>
                       </div>
                       <div className="border border-neutral-300 bg-white rounded px-1 py-0.5 z-0">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" /><polyline points="14 2 14 8 20 8" /></svg>
                       </div>
                     </div>
                     <span className="ml-1">2 actions</span>
@@ -1197,7 +1201,7 @@ export default function Project() {
               {image && (
                 <div className="mb-2 relative inline-block">
                   <img src={image} alt="Preview" className="h-16 rounded-md border border-neutral-200" />
-                  <button 
+                  <button
                     onClick={() => setImage(null)}
                     className="absolute -top-2 -right-2 bg-neutral-800 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs"
                   >
@@ -1210,16 +1214,16 @@ export default function Project() {
                 <button className="bg-[#4a4a4a] text-white text-xs font-medium px-3 py-1.5 rounded-md hover:bg-[#3a3a3a] transition-colors">Add credits</button>
               </div>
               <div className="bg-white rounded-xl border border-neutral-200 flex items-center p-1.5 relative z-10 shadow-sm">
-                <button 
+                <button
                   onClick={() => fileInputRef.current?.click()}
                   className="p-2 text-neutral-500 hover:text-neutral-700 transition-colors"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48" /></svg>
                 </button>
-                <input 
-                  type="file" 
-                  accept="image/*" 
-                  className="hidden" 
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
                   ref={fileInputRef}
                   onChange={handleImageUpload}
                 />
@@ -1231,7 +1235,7 @@ export default function Project() {
                   placeholder="Reply..."
                   className="flex-1 outline-none text-[15px] px-2 text-neutral-700 placeholder:text-neutral-400 bg-transparent"
                 />
-                <button 
+                <button
                   onClick={() => handleSend()}
                   disabled={loading || (!input.trim() && !image)}
                   className="bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
@@ -1251,12 +1255,12 @@ export default function Project() {
       {/* Main Canvas Area */}
       <div className="flex-1 flex flex-col relative pt-14 md:pt-0">
         <ReferralModal isOpen={showReferralModal} onClose={() => setShowReferralModal(false)} />
-      
-      {/* Top Bar */}
+
+        {/* Top Bar */}
         <div className="hidden md:flex h-14 bg-white border-b border-neutral-200 items-center justify-between px-6 z-10 shadow-sm">
           <div className="flex items-center gap-4">
-            <button 
-              onClick={() => navigate('/')} 
+            <button
+              onClick={() => navigate('/')}
               className="flex items-center gap-2 text-neutral-500 hover:text-neutral-800 transition-colors mr-2"
               title="Retour à l'accueil"
             >
@@ -1264,10 +1268,10 @@ export default function Project() {
             </button>
             {isEditingProjectName ? (
               <div className="flex items-center gap-2">
-                <input 
-                  type="text" 
-                  value={editProjectName} 
-                  onChange={e => setEditProjectName(e.target.value)} 
+                <input
+                  type="text"
+                  value={editProjectName}
+                  onChange={e => setEditProjectName(e.target.value)}
                   className="font-semibold text-neutral-800 border-b border-neutral-300 outline-none"
                   autoFocus
                   onKeyDown={e => { if (e.key === 'Enter') handleProjectNameUpdate(); }}
@@ -1281,7 +1285,7 @@ export default function Project() {
                 </span>
                 {project.user_id === user?.id && (
                   <>
-                    <button 
+                    <button
                       onClick={handleProjectPrivacyToggle}
                       className="p-1 hover:bg-neutral-100 rounded-md transition-colors"
                       title={project.is_private === 1 ? "Rendre public" : "Rendre privé"}
@@ -1338,7 +1342,7 @@ export default function Project() {
               </button>
             )}
             {project.user_id === user?.id && (
-              <button 
+              <button
                 onClick={() => setShowReferralModal(true)}
                 className="bg-blue-600 text-white text-xs font-medium px-3 py-1.5 rounded-md hover:bg-blue-700 transition-colors flex items-center gap-1"
               >
@@ -1367,7 +1371,7 @@ export default function Project() {
         </div>
 
         {/* Canvas */}
-        <div 
+        <div
           className={`flex-1 relative overflow-hidden bg-white ${isPanning ? 'cursor-grabbing' : 'cursor-grab'}`}
           style={{
             backgroundImage: 'radial-gradient(circle, #d1d5db 1px, transparent 1px)',
@@ -1382,19 +1386,19 @@ export default function Project() {
           onMouseUp={handleCanvasMouseUp}
           onMouseLeave={handleCanvasMouseLeave}
         >
-          <div style={{ 
-            transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`, 
-            transformOrigin: '0 0', 
-            width: '10000px', 
+          <div style={{
+            transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
+            transformOrigin: '0 0',
+            width: '10000px',
             height: '10000px',
             transition: isPanning ? 'none' : 'transform 0.15s ease-out'
           }}>
             {cards.map(card => (
-              <DraggableCard 
-                key={card.id} 
-                card={card} 
-                onDrag={handleCardDrag} 
-                onStop={handleCardStop} 
+              <DraggableCard
+                key={card.id}
+                card={card}
+                onDrag={handleCardDrag}
+                onStop={handleCardStop}
                 onDelete={handleCardDelete}
                 onUpdate={handleCardUpdate}
                 onSendToChat={handleSendToChat}
@@ -1407,15 +1411,15 @@ export default function Project() {
         {/* Bottom Bar */}
         <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-white rounded-full border border-neutral-200 shadow-lg px-2 md:px-4 py-2 flex items-center gap-2 md:gap-4 z-10">
           <button onClick={() => setIsChatOpen(!isChatOpen)} className="p-2 hover:bg-neutral-100 rounded-full text-neutral-500" title="Messages"><MessageSquare className="w-4 h-4" /></button>
-          <button onClick={() => { setPan({x: 0, y: 0}); setZoom(1); }} className="p-2 hover:bg-neutral-100 rounded-full text-neutral-500" title="Recentrer la vue"><Maximize2 className="w-4 h-4" /></button>
-          
+          <button onClick={() => { setPan({ x: 0, y: 0 }); setZoom(1); }} className="p-2 hover:bg-neutral-100 rounded-full text-neutral-500" title="Recentrer la vue"><Maximize2 className="w-4 h-4" /></button>
+
           {user && (
             <div className="relative">
               <button onClick={() => setShowAddMenu(!showAddMenu)} className="p-2 hover:bg-neutral-100 rounded-full text-neutral-500"><Plus className="w-4 h-4" /></button>
               {showAddMenu && (
                 <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-white rounded-lg shadow-lg border border-neutral-200 py-2 w-48 z-50">
                   <button onClick={() => { handleAddCard(); setShowAddMenu(false); }} className="w-full text-left px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50">Nouvelle note</button>
-                  <button onClick={() => { 
+                  <button onClick={() => {
                     const url = prompt("Entrez l'URL du lien :");
                     if (url) {
                       fetch(`/api/projects/${id}/cards`, {
@@ -1451,12 +1455,12 @@ export default function Project() {
             <p className="text-neutral-600 mb-6 text-sm">
               Partagez ce lien avec votre équipe pour qu'ils puissent consulter et collaborer sur ce projet.
             </p>
-            
+
             {project.user_id === user?.id && (
               <div className="mb-6">
                 <label className="flex items-center gap-3 p-3 border border-neutral-200 rounded-xl cursor-pointer hover:bg-neutral-50 transition-colors">
-                  <input 
-                    type="checkbox" 
+                  <input
+                    type="checkbox"
                     checked={project.is_private === 0}
                     onChange={handleProjectPrivacyToggle}
                     className="w-4 h-4 text-blue-600 rounded border-neutral-300 focus:ring-blue-600"
@@ -1470,13 +1474,13 @@ export default function Project() {
             )}
 
             <div className="flex gap-2">
-              <input 
-                type="text" 
-                readOnly 
+              <input
+                type="text"
+                readOnly
                 value={window.location.href}
                 className="flex-1 px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-lg text-sm text-neutral-600 outline-none"
               />
-              <button 
+              <button
                 onClick={() => {
                   navigator.clipboard.writeText(window.location.href);
                   addToast("Lien copié !", "success");
@@ -1487,7 +1491,7 @@ export default function Project() {
               </button>
             </div>
 
-            <button 
+            <button
               onClick={() => setShowShareModal(false)}
               className="mt-6 w-full py-2.5 text-neutral-600 font-medium hover:bg-neutral-100 rounded-xl transition-colors text-sm"
             >
@@ -1525,27 +1529,27 @@ export default function Project() {
                 <span className="text-neutral-600">Voir les raccourcis</span>
                 <kbd className="bg-neutral-100 px-2 py-1 rounded border border-neutral-200 font-mono text-xs">Alt + /</kbd>
               </div>
-               <div className="border-t border-neutral-100 my-2 pt-2">
+              <div className="border-t border-neutral-100 my-2 pt-2">
                 <p className="text-xs font-semibold text-neutral-500 mb-2">Navigation Globale</p>
                 <div className="flex justify-between text-sm mb-1">
                   <span className="text-neutral-600">Accueil</span>
                   <kbd className="bg-neutral-100 px-2 py-1 rounded border border-neutral-200 font-mono text-xs">Alt + H</kbd>
                 </div>
-                 <div className="flex justify-between text-sm mb-1">
+                <div className="flex justify-between text-sm mb-1">
                   <span className="text-neutral-600">Projets</span>
                   <kbd className="bg-neutral-100 px-2 py-1 rounded border border-neutral-200 font-mono text-xs">Alt + P</kbd>
                 </div>
-                 <div className="flex justify-between text-sm mb-1">
+                <div className="flex justify-between text-sm mb-1">
                   <span className="text-neutral-600">Docs</span>
                   <kbd className="bg-neutral-100 px-2 py-1 rounded border border-neutral-200 font-mono text-xs">Alt + D</kbd>
                 </div>
-                 <div className="flex justify-between text-sm">
+                <div className="flex justify-between text-sm">
                   <span className="text-neutral-600">Paramètres</span>
                   <kbd className="bg-neutral-100 px-2 py-1 rounded border border-neutral-200 font-mono text-xs">Alt + S</kbd>
                 </div>
               </div>
             </div>
-            <button 
+            <button
               onClick={() => setShowShortcutsModal(false)}
               className="mt-6 w-full py-2.5 bg-neutral-800 text-white font-medium hover:bg-neutral-700 rounded-xl transition-colors text-sm"
             >
@@ -1566,20 +1570,20 @@ export default function Project() {
               <strong>Première consultation 100% gratuite !</strong>
             </p>
             <div className="flex flex-col gap-3">
-              <a 
+              <a
                 href="mailto:contact@uprising-studio.com?subject=Consultation%20gratuite%20-%20Plan%20d'action"
                 className="w-full bg-blue-600 text-white font-semibold py-3 rounded-xl text-center hover:bg-blue-700 transition-colors"
                 onClick={() => setShowExportModal(false)}
               >
                 Contacter l'agence
               </a>
-              <button 
+              <button
                 onClick={handleExport}
                 className="w-full bg-neutral-100 text-neutral-700 font-medium py-3 rounded-xl hover:bg-neutral-200 transition-colors"
               >
                 Continuer l'exportation (.zip)
               </button>
-              <button 
+              <button
                 onClick={() => setShowExportModal(false)}
                 className="w-full text-neutral-500 text-sm py-2 hover:text-neutral-700"
               >

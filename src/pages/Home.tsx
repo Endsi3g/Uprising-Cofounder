@@ -13,7 +13,7 @@ export default function Home() {
   const [showBrainstormModal, setShowBrainstormModal] = useState(false);
   const [brainstormInterests, setBrainstormInterests] = useState("");
   const [businessType, setBusinessType] = useState<'startup' | 'traditional'>('startup');
-  const [generatedIdeas, setGeneratedIdeas] = useState<{title: string, description: string, targetAudience?: string, businessModel?: string, marketOpportunity?: string, estimatedTime?: string, methods?: {free: string, paid: string}}[]>([]);
+  const [generatedIdeas, setGeneratedIdeas] = useState<{ title: string, description: string, targetAudience?: string, businessModel?: string, marketOpportunity?: string, estimatedTime?: string, methods?: { free: string, paid: string } }[]>([]);
   const [isGeneratingIdeas, setIsGeneratingIdeas] = useState(false);
   const [isCreatingProject, setIsCreatingProject] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -33,7 +33,7 @@ export default function Home() {
       headers: { 'Authorization': `Bearer ${token}` }
     })
       .then(res => res.json())
-      .then(data => setProjects(data));
+      .then(data => setProjects(data.projects || data));
   }, [token]);
 
   const handleStartProject = async (overrideIdea?: string, template?: Template) => {
@@ -41,22 +41,22 @@ export default function Home() {
     const finalIdea = overrideIdea || idea;
     const projectName = template ? template.name : (finalIdea ? (finalIdea.slice(0, 30) + "...") : "Nouveau projet");
     const projectDescription = template ? template.description : (finalIdea || "Projet vide");
-    
+
     try {
       const res = await fetch("/api/projects", {
         method: "POST",
-        headers: { 
+        headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${token}`
         },
         body: JSON.stringify({ name: projectName, description: projectDescription, mode, is_private: isPrivate }),
       });
-      
+
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}));
         throw new Error(errorData.error || "Failed to create project");
       }
-      
+
       const project = await res.json();
 
       if (template) {
@@ -67,7 +67,7 @@ export default function Home() {
           const col = (card.phase - 1) % 3;
           return fetch(`/api/projects/${project.id}/cards`, {
             method: "POST",
-            headers: { 
+            headers: {
               "Content-Type": "application/json",
               "Authorization": `Bearer ${token}`
             },
@@ -94,13 +94,13 @@ export default function Home() {
   const handleDeleteProject = async (e: React.MouseEvent, projectId: string) => {
     e.stopPropagation();
     if (!confirm("Voulez-vous vraiment supprimer ce projet ?")) return;
-    
+
     try {
       const res = await fetch(`/api/projects/${projectId}`, {
         method: "DELETE",
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      
+
       if (res.ok) {
         setProjects(prev => prev.filter(p => p.id !== projectId));
       }
@@ -157,21 +157,21 @@ export default function Home() {
             <button className="flex items-center gap-3 w-full px-3 py-2 bg-neutral-200/50 rounded-lg text-sm font-medium">
               <HomeIcon className="w-4 h-4" /> Accueil
             </button>
-            <button 
+            <button
               onClick={() => navigate('/help')}
               className="flex items-center gap-3 w-full px-3 py-2 text-neutral-600 hover:bg-neutral-200/50 rounded-lg text-sm font-medium"
             >
               <HelpCircle className="w-4 h-4" /> Aide & Tutoriels
             </button>
             {user?.role === 'admin' && (
-              <button 
+              <button
                 onClick={() => navigate('/settings')}
                 className="flex items-center gap-3 w-full px-3 py-2 text-neutral-600 hover:bg-neutral-200/50 rounded-lg text-sm font-medium"
               >
                 <Settings className="w-4 h-4" /> Paramètres
               </button>
             )}
-            <button 
+            <button
               onClick={() => navigate('/account')}
               className="flex items-center gap-3 w-full px-3 py-2 text-neutral-600 hover:bg-neutral-200/50 rounded-lg text-sm font-medium"
             >
@@ -179,9 +179,9 @@ export default function Home() {
             </button>
           </nav>
         </div>
-        
+
         <div className="space-y-2">
-          <button 
+          <button
             onClick={logout}
             className="flex items-center justify-between w-full p-3 hover:bg-neutral-200/50 rounded-xl text-sm text-left"
           >
@@ -204,11 +204,11 @@ export default function Home() {
               <Crown className="w-3 h-3" /> Plan Pro Actif
             </div>
           </div>
-          
+
           <h1 className="text-3xl md:text-4xl font-semibold text-neutral-900 text-center mb-8">
             Bonjour, {user?.name?.split(' ')[0] || user?.email?.split('@')[0]}
           </h1>
-          
+
           {/* Main input */}
           <div className="bg-white rounded-2xl p-2 shadow-[0_4px_20px_rgba(0,0,0,0.04)] border border-neutral-100 mb-6">
             <textarea
@@ -241,7 +241,7 @@ export default function Home() {
                   🔍 Analyser
                 </button>
               </div>
-              <button 
+              <button
                 onClick={() => handleStartProject()}
                 disabled={isCreatingProject}
                 className="bg-blue-600/20 text-blue-600 hover:bg-blue-600 hover:text-white transition-colors rounded-full w-full sm:w-8 h-8 flex items-center justify-center disabled:opacity-50"
@@ -255,19 +255,19 @@ export default function Home() {
               </button>
             </div>
           </div>
-          
+
           {/* Action buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-between mb-8 gap-4 sm:gap-0">
             <div className="flex flex-wrap items-center justify-center gap-3 w-full sm:w-auto">
-              <button 
+              <button
                 onClick={() => handleStartProject()}
                 disabled={isCreatingProject}
                 className="flex items-center gap-2 bg-white border border-neutral-200 text-neutral-700 rounded-full px-4 py-2 text-sm font-medium shadow-sm hover:bg-neutral-50 disabled:opacity-50"
               >
-                {isCreatingProject ? <Loader2 className="w-4 h-4 animate-spin" /> : <span className="text-neutral-400">▷</span>} 
+                {isCreatingProject ? <Loader2 className="w-4 h-4 animate-spin" /> : <span className="text-neutral-400">▷</span>}
                 {isCreatingProject ? "Création..." : "Démarrer le projet"}
               </button>
-              <button 
+              <button
                 onClick={() => setShowBrainstormModal(true)}
                 className="flex items-center gap-2 bg-white border border-neutral-200 text-neutral-700 rounded-full px-4 py-2 text-sm font-medium shadow-sm hover:bg-neutral-50"
               >
@@ -276,8 +276,8 @@ export default function Home() {
             </div>
             <div className="flex items-center gap-2 text-sm text-neutral-500 font-medium">
               Mode privé
-              <div 
-                className={`w-8 h-4 rounded-full relative cursor-pointer transition-colors ${isPrivate ? 'bg-blue-600' : 'bg-neutral-200'}`} 
+              <div
+                className={`w-8 h-4 rounded-full relative cursor-pointer transition-colors ${isPrivate ? 'bg-blue-600' : 'bg-neutral-200'}`}
                 onClick={() => setIsPrivate(!isPrivate)}
               >
                 <div className={`w-3 h-3 bg-white rounded-full absolute top-0.5 shadow-sm transition-transform ${isPrivate ? 'left-4' : 'left-0.5'}`}></div>
@@ -309,7 +309,7 @@ export default function Home() {
               ))}
             </div>
           </div>
-          
+
           {/* All projects */}
           <div className="mt-8">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-4">
@@ -322,19 +322,19 @@ export default function Home() {
                   {filteredProjects.length} projet{filteredProjects.length > 1 ? 's' : ''}
                 </span>
               </div>
-              
+
               <div className="flex items-center gap-2">
                 <div className="relative">
                   <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" />
-                  <input 
-                    type="text" 
-                    placeholder="Rechercher..." 
+                  <input
+                    type="text"
+                    placeholder="Rechercher..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="pl-9 pr-4 py-1.5 text-sm border border-neutral-200 rounded-lg focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 w-full sm:w-48"
                   />
                 </div>
-                <button 
+                <button
                   onClick={() => setSortBy(prev => prev === "date" ? "name" : "date")}
                   className="flex items-center gap-1.5 px-3 py-1.5 text-sm border border-neutral-200 rounded-lg hover:bg-neutral-50 text-neutral-600 whitespace-nowrap"
                   title={`Trier par ${sortBy === "date" ? "nom" : "date"}`}
@@ -344,11 +344,11 @@ export default function Home() {
                 </button>
               </div>
             </div>
-            
+
             {filteredProjects.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {filteredProjects.map((project) => (
-                  <div 
+                  <div
                     key={project.id}
                     onClick={() => navigate(`/project/${project.id}`)}
                     className="bg-white rounded-xl border border-neutral-200 p-4 hover:border-blue-600 hover:shadow-md transition-all cursor-pointer group flex flex-col justify-between min-h-[120px]"
@@ -363,7 +363,7 @@ export default function Home() {
                             <span title="Projet public"><Globe className="w-3 h-3 text-neutral-400" /></span>
                           )}
                         </h3>
-                        <button 
+                        <button
                           onClick={(e) => handleDeleteProject(e, project.id)}
                           className="text-neutral-300 hover:text-red-500 transition-colors p-1 opacity-0 group-hover:opacity-100"
                           title="Supprimer le projet"
@@ -410,14 +410,14 @@ export default function Home() {
                   <p className="text-sm text-neutral-500">Laissez l'IA vous suggérer des concepts innovants.</p>
                 </div>
               </div>
-              <button 
+              <button
                 onClick={() => setShowBrainstormModal(false)}
                 className="p-2 text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100 rounded-full transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
-            
+
             <div className="p-6 overflow-y-auto flex-1">
               <div className="mb-6 space-y-4">
                 <div>
@@ -499,7 +499,7 @@ export default function Home() {
                 <div className="space-y-4">
                   <h3 className="text-sm font-medium text-neutral-500 uppercase tracking-wider">Idées générées</h3>
                   {generatedIdeas.map((idea, index) => (
-                    <div 
+                    <div
                       key={index}
                       className="border border-neutral-200 rounded-xl p-4 hover:border-blue-600 hover:shadow-md transition-all cursor-pointer group"
                       onClick={() => {
@@ -515,7 +515,7 @@ export default function Home() {
                         </span>
                       </div>
                       <p className="text-sm text-neutral-600 leading-relaxed mb-3">{idea.description}</p>
-                      
+
                       <div className="flex flex-wrap gap-2 mt-2 mb-3">
                         {idea.estimatedTime && (
                           <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-purple-50 text-purple-700 text-xs font-medium">
@@ -554,7 +554,7 @@ export default function Home() {
                   ))}
                 </div>
               )}
-              
+
               {!isGeneratingIdeas && generatedIdeas.length === 0 && (
                 <div className="text-center py-12 text-neutral-400">
                   <Lightbulb className="w-12 h-12 mx-auto mb-3 opacity-20" />

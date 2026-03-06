@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+
+Disallow: /api/
+Disallow: /settings
+Disallow: /account
+Disallow: /user-onboarding
+
+Sitemap: https://cofounder.uprisingstudio.ca/sitemap.xml
