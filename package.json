@@ -10,7 +10,8 @@
     "clean": "rm -rf dist",
     "lint": "tsc --noEmit",
     "start": "node --import tsx server.ts",
-    "start:prod": "NODE_ENV=production node --import tsx server.ts"
+    "start:prod": "NODE_ENV=production node --import tsx server.ts",
+    "deploy:test": "powershell -ExecutionPolicy Bypass -File ./scripts/test-local.ps1"
   },
   "dependencies": {
     "@google/genai": "^1.29.0",
