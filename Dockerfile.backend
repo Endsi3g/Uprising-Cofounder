@@ -5,6 +5,7 @@ FROM node:20-slim
 RUN apt-get update && apt-get install -y \
     curl \
     lsb-release \
+    zstd \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Ollama
