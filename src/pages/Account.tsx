@@ -10,6 +10,43 @@ export default function Account() {
   const { addToast } = useToast();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUpdatingRole, setIsUpdatingRole] = useState(false);
+  const [mfaSetup, setMfaSetup] = useState<{ secret: string, qr_code: string } | null>(null);
+  const [mfaToken, setMfaToken] = useState('');
+  const [isUpdatingMfa, setIsUpdatingMfa] = useState(false);
+
+  const handleSetupMfa = async () => {
+    try {
+      const res = await fetch("/api/auth/mfa/setup", {
+        method: "POST",
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      setMfaSetup(data);
+    } catch (err: any) {
+      addToast(err.message, "error");
+    }
+  };
+
+  const handleVerifyMfa = async () => {
+    setIsUpdatingMfa(true);
+    try {
+      const res = await fetch("/api/auth/mfa/verify-setup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+        body: JSON.stringify({ token: mfaToken })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      addToast("MFA activé avec succès", "success");
+      updateUser({ ...user!, mfa_enabled: true });
+      setMfaSetup(null);
+    } catch (err: any) {
+      addToast(err.message, "error");
+    } finally {
+      setIsUpdatingMfa(false);
+    }
+  };
 
   return (
     <div className="flex h-screen bg-slate-50">
@@ -143,6 +180,59 @@ export default function Account() {
                     </div>
                   </div>
                 </div>
+              </div>
+            </div>
+
+            <div className="bg-white p-6 rounded-2xl border border-neutral-200 shadow-sm">
+              <h2 className="text-lg font-semibold text-neutral-900 mb-4 flex items-center gap-2">
+                <Shield className="w-5 h-5 text-neutral-500" /> Sécurité (MFA)
+              </h2>
+              <div className="bg-neutral-50 rounded-xl p-4 border border-neutral-200">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium text-neutral-800">Authentification à Deux Facteurs (2FA)</p>
+                    <p className="text-sm text-neutral-500 mt-1">Ajoute une couche de sécurité supplémentaire à votre compte.</p>
+                  </div>
+                  {user?.mfa_enabled === true ? (
+                    <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-medium">Activé</span>
+                  ) : (
+                    <button 
+                      onClick={handleSetupMfa}
+                      className="bg-white border border-neutral-200 text-neutral-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-neutral-50 transition-colors"
+                    >
+                      Configurer
+                    </button>
+                  )}
+                </div>
+                
+                {mfaSetup && user?.mfa_enabled !== true && (
+                  <div className="mt-6 pt-6 border-t border-neutral-200 flex flex-col sm:flex-row gap-6">
+                    <div className="bg-white p-2 rounded-xl border border-neutral-200 inline-block fit-content">
+                      <img src={mfaSetup.qr_code} alt="QR Code MFA" className="w-32 h-32" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-neutral-800 mb-2">1. Scannez ce QR code avec Google Authenticator ou Authy</p>
+                      <p className="text-sm font-medium text-neutral-800 mb-2">2. Entrez le code généré ci-dessous</p>
+                      <div className="flex gap-2">
+                        <input 
+                          type="text" 
+                          value={mfaToken}
+                          onChange={e => setMfaToken(e.target.value)}
+                          placeholder="123456"
+                          className="flex-1 border border-neutral-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+                        />
+                        <button 
+                          onClick={handleVerifyMfa}
+                          disabled={isUpdatingMfa || mfaToken.length < 6}
+                          className="bg-blue-600 text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center gap-2"
+                        >
+                          {isUpdatingMfa && <Loader2 className="w-4 h-4 animate-spin" />}
+                          Vérifier
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 

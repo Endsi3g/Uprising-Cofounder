@@ -1,0 +1,6 @@
+src/main.tsx(8,20): error TS2339: Property 'env' does not exist on type 'ImportMeta'.
+src/pages/Account.tsx(42,30): error TS2353: Object literal may only specify known properties, and 'mfa_enabled' does not exist in type 'User'.
+src/pages/Account.tsx(196,26): error TS2339: Property 'mfa_enabled' does not exist on type 'User'.
+src/pages/Account.tsx(196,53): error TS2339: Property 'mfa_enabled' does not exist on type 'User'.
+src/pages/Account.tsx(208,36): error TS2339: Property 'mfa_enabled' does not exist on type 'User'.
+src/pages/Account.tsx(208,63): error TS2339: Property 'mfa_enabled' does not exist on type 'User'.

@@ -10,7 +10,7 @@ Suite au renforcement de la sécurité et à la préparation de l'infrastructure
 
 ## 💾 Gestion des Données & Scalabilité
 
-- [ ] **Stockage Cloud pour Images** : Migrer le stockage des images (actuellement en Base64 dans SQLite) vers un bucket S3 ou Google Cloud Storage pour améliorer les performances de la base de données.
+- [ ] **Stockage Cloud pour Images** : Migrer le stockage des images (actuellement en Base64 dans SQLite) vers un bucket S3  pour améliorer les performances de la base de données.
 - [ ] **Migration vers PostgreSQL** : Si le trafic augmente, envisager de migrer de SQLite vers PostgreSQL pour une meilleure gestion de la concurrence.
 - [ ] **Soft Delete** : Implémenter une colonne `deleted_at` pour permettre la récupération de données supprimées accidentellement.
 

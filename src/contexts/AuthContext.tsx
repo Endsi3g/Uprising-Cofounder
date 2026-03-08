@@ -20,6 +20,8 @@ interface User {
   credits?: number;
   referral_code?: string;
   referred_by?: string;
+  mfa_enabled?: boolean;
+  is_verified?: boolean;
 }
 
 interface AuthContextType {

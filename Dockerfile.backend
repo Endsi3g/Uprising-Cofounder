@@ -1,0 +1,40 @@
+# Use Node.js as base image
+FROM node:20-slim
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    curl \
+    lsb-release \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Ollama
+RUN curl -fsSL https://ollama.com/install.sh | sh
+
+# Set working directory
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install dependencies
+RUN npm install
+
+# Copy Prisma schema
+COPY prisma ./prisma/
+
+# Generate Prisma client
+RUN npx prisma generate
+
+# Copy source code
+COPY . .
+
+# Expose ports
+# 3000: Backend API
+# 11434: Ollama API
+EXPOSE 3000 11434
+
+# Ensure entrypoint script is executable
+RUN chmod +x ./scripts/docker-entrypoint.sh
+
+# Use entrypoint script to manage Ollama and Node
+ENTRYPOINT ["./scripts/docker-entrypoint.sh"]

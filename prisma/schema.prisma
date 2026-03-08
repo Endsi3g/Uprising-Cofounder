@@ -1,0 +1,126 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id                    String    @id @default(uuid())
+  email                 String    @unique
+  password_hash         String
+  name                  String?
+  role                  String    @default("user") // 'user', 'admin'
+  goal                  String?
+  onboarding_completed  Boolean   @default(false)
+  notifications_enabled Boolean   @default(true)
+  theme                 String?   @default("light")
+  default_mode          String?   @default("create")
+  
+  bland_api_key         String?
+  twilio_account_sid    String?
+  twilio_auth_token     String?
+  twilio_phone_number   String?
+  elevenlabs_api_key    String?
+  twenty_api_key        String?
+  credits               Int       @default(100)
+  referral_code         String?
+  referred_by           String?
+  is_verified           Boolean   @default(false)
+  verification_token    String?
+  reset_token           String?
+  reset_token_expiry    DateTime?
+  mfa_secret            String?
+  mfa_enabled           Boolean   @default(false)
+
+  created_at            DateTime  @default(now())
+
+  projects              Project[]
+  projectMembers        ProjectMember[]
+  cardComments          CardComment[]
+  
+  @@map("users")
+}
+
+model Project {
+  id          String    @id @default(uuid())
+  name        String
+  description String?
+  mode        String?   @default("create") // 'create', 'scale', 'analyse'
+  is_private  Boolean   @default(false)
+  user_id     String?
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @default(now()) @updatedAt
+  deleted_at  DateTime?
+
+  user        User?     @relation(fields: [user_id], references: [id])
+  cards       Card[]
+  messages    Message[]
+  members     ProjectMember[]
+
+  @@map("projects")
+}
+
+model Card {
+  id          String    @id @default(uuid())
+  project_id  String
+  title       String
+  content     String?
+  position_x  Float     @default(100)
+  position_y  Float     @default(100)
+  phase       Int       @default(1)
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @default(now()) @updatedAt
+  deleted_at  DateTime?
+
+  project     Project   @relation(fields: [project_id], references: [id], onDelete: Cascade)
+  comments    CardComment[]
+
+  @@map("cards")
+}
+
+model Message {
+  id          String    @id @default(uuid())
+  project_id  String
+  role        String?   // 'user', 'assistant'
+  content     String?
+  image       String?
+  created_at  DateTime  @default(now())
+  deleted_at  DateTime?
+
+  project     Project   @relation(fields: [project_id], references: [id], onDelete: Cascade)
+
+  @@map("messages")
+}
+
+model CardComment {
+  id          String    @id @default(uuid())
+  card_id     String
+  user_id     String
+  content     String
+  created_at  DateTime  @default(now())
+  deleted_at  DateTime?
+
+  card        Card      @relation(fields: [card_id], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("card_comments")
+}
+
+model ProjectMember {
+  id          String    @id @default(uuid())
+  project_id  String
+  user_id     String
+  role        String?   @default("viewer") // 'owner', 'editor', 'viewer'
+  joined_at   DateTime  @default(now())
+
+  project     Project   @relation(fields: [project_id], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([project_id, user_id])
+  @@map("project_members")
+}

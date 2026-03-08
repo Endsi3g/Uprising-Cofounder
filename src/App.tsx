@@ -13,6 +13,8 @@ const Project = React.lazy(() => import("./pages/Project"));
 const Login = React.lazy(() => import("./pages/Login"));
 const Register = React.lazy(() => import("./pages/Register"));
 const ResetPassword = React.lazy(() => import("./pages/ResetPassword"));
+const ForgotPassword = React.lazy(() => import("./pages/ForgotPassword"));
+const VerifyEmail = React.lazy(() => import("./pages/VerifyEmail"));
 const UserOnboarding = React.lazy(() => import("./pages/UserOnboarding"));
 const Help = React.lazy(() => import("./pages/Help"));
 const SettingsPage = React.lazy(() => import("./pages/SettingsPage"));
@@ -21,6 +23,7 @@ const Documentation = React.lazy(() => import("./pages/Documentation"));
 const OurStory = React.lazy(() => import("./pages/OurStory"));
 const Welcome = React.lazy(() => import("./pages/Welcome"));
 const FlashDemo = React.lazy(() => import("./pages/FlashDemo"));
+const Blog = React.lazy(() => import("./pages/Blog"));
 const NotFound = React.lazy(() => import("./pages/NotFound"));
 
 const LoadingFallback = () => (
@@ -107,6 +110,8 @@ const AnimatedRoutes = () => {
           <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
           <Route path="/register" element={<PageTransition><Register /></PageTransition>} />
           <Route path="/reset-password" element={<PageTransition><ResetPassword /></PageTransition>} />
+          <Route path="/forgot-password" element={<PageTransition><ForgotPassword /></PageTransition>} />
+          <Route path="/verify-email" element={<PageTransition><VerifyEmail /></PageTransition>} />
           <Route path="/" element={<ProtectedRoute><PageTransition><Home /></PageTransition></ProtectedRoute>} />
           <Route path="/onboarding" element={<ProtectedRoute><PageTransition><Onboarding /></PageTransition></ProtectedRoute>} />
           <Route path="/user-onboarding" element={<ProtectedRoute><PageTransition><UserOnboarding /></PageTransition></ProtectedRoute>} />
@@ -116,6 +121,7 @@ const AnimatedRoutes = () => {
           <Route path="/account" element={<ProtectedRoute><PageTransition><Account /></PageTransition></ProtectedRoute>} />
           <Route path="/documentation" element={<PageTransition><Documentation /></PageTransition>} />
           <Route path="/our-story" element={<PageTransition><OurStory /></PageTransition>} />
+          <Route path="/blog" element={<PageTransition><Blog /></PageTransition>} />
           {/* Catch-all 404 route */}
           <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
         </Routes>

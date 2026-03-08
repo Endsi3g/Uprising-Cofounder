@@ -8,6 +8,9 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [mfaRequired, setMfaRequired] = useState(false);
+  const [mfaToken, setMfaToken] = useState('');
+  const [userId, setUserId] = useState('');
   const navigate = useNavigate();
   const { login, user } = useAuth();
 
@@ -23,15 +26,21 @@ export default function Login() {
     setLoading(true);
     
     try {
-      const res = await fetch('/api/auth/login', {
+      const res = await fetch(mfaRequired ? '/api/auth/login-mfa' : '/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify(mfaRequired ? { userId, token: mfaToken } : { email, password })
       });
       
       const data = await res.json();
       
       if (!res.ok) throw new Error(data.error);
+
+      if (data.mfa_required) {
+        setMfaRequired(true);
+        setUserId(data.userId);
+        return;
+      }
       
       login(data.token, data.user);
       navigate('/');
@@ -50,26 +59,50 @@ export default function Login() {
         {error && <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-4 text-sm">{error}</div>}
         
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-neutral-700 mb-1">Email</label>
-            <input 
-              type="email" 
-              required
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              className="w-full border border-neutral-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-neutral-700 mb-1">Mot de passe</label>
-            <input 
-              type="password" 
-              required
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              className="w-full border border-neutral-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
-            />
-          </div>
+          {!mfaRequired ? (
+            <>
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-neutral-700 mb-1">Email</label>
+                <input 
+                  id="email"
+                  title="Email"
+                  placeholder="votre@email.com"
+                  type="email" 
+                  required
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  className="w-full border border-neutral-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label htmlFor="password" className="block text-sm font-medium text-neutral-700 mb-1">Mot de passe</label>
+                <input 
+                  id="password"
+                  title="Mot de passe"
+                  placeholder="Votre mot de passe"
+                  type="password" 
+                  required
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  className="w-full border border-neutral-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+                />
+              </div>
+            </>
+          ) : (
+            <div>
+              <label htmlFor="mfaToken" className="block text-sm font-medium text-neutral-700 mb-1">Code d'authentification (MFA)</label>
+              <input 
+                id="mfaToken"
+                title="Code d'authentification"
+                type="text"
+                required
+                value={mfaToken}
+                onChange={e => setMfaToken(e.target.value)}
+                placeholder="123456"
+                className="w-full border border-neutral-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+              />
+            </div>
+          )}
           <button 
             type="submit"
             disabled={loading}
@@ -85,7 +118,7 @@ export default function Login() {
             Pas encore de compte ? <Link to="/register" className="text-blue-600 hover:underline">S'inscrire</Link>
           </p>
           <p>
-            Mot de passe oublié ? <Link to="/reset-password" className="text-blue-600 hover:underline">Le réinitialiser</Link>
+            Mot de passe oublié ? <Link to="/forgot-password" className="text-blue-600 hover:underline">Le réinitialiser</Link>
           </p>
         </div>
       </div>

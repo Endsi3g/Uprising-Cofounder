@@ -10,6 +10,7 @@ import { useKeyboardShortcuts } from "../hooks/useKeyboardShortcuts";
 import ReferralModal from "../components/ReferralModal";
 import JSZip from "jszip";
 import { jsPDF } from "jspdf";
+import html2canvas from "html2canvas";
 import { io, Socket } from "socket.io-client";
 
 const DraggableCard = memo(({
@@ -19,6 +20,7 @@ const DraggableCard = memo(({
   onDelete,
   onUpdate,
   onSendToChat,
+  onCommentAdded,
   zoom
 }: {
   card: any,
@@ -27,6 +29,7 @@ const DraggableCard = memo(({
   onDelete: (id: string) => void,
   onUpdate: (id: string, title: string, content: string) => void,
   onSendToChat: (content: string) => void,
+  onCommentAdded: (cardId: string, comment: any) => void,
   zoom: number
 }) => {
   const nodeRef = useRef<HTMLDivElement>(null);
@@ -74,6 +77,7 @@ const DraggableCard = memo(({
       const comment = await res.json();
       setComments(prev => [...prev, comment]);
       setNewComment("");
+      onCommentAdded(card.id, comment);
     }
   };
 
@@ -89,6 +93,8 @@ const DraggableCard = memo(({
       <div className="flex justify-between items-start mb-3">
         {isEditing ? (
           <input
+            title="Edit card title"
+            placeholder="Enter card title"
             type="text"
             value={editTitle}
             onChange={e => setEditTitle(e.target.value)}
@@ -126,6 +132,8 @@ const DraggableCard = memo(({
       <div className={`text-neutral-500 text-xs leading-relaxed ${isMaximized ? 'flex-1' : ''}`}>
         {isEditing && !isImage ? (
           <textarea
+            title="Edit card content"
+            placeholder="Enter card content"
             value={editContent}
             onChange={e => setEditContent(e.target.value)}
             className="w-full h-32 border border-neutral-200 rounded p-2 outline-none resize-none no-drag"
@@ -166,7 +174,10 @@ const DraggableCard = memo(({
             )}
           </div>
           <form onSubmit={handleAddComment} className="flex gap-2">
+            <label htmlFor={`comment-input-${card.id}`} className="sr-only">Commenter</label>
             <input
+              id={`comment-input-${card.id}`}
+              title="Ajouter un commentaire"
               type="text"
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
@@ -174,6 +185,7 @@ const DraggableCard = memo(({
               className="flex-1 text-xs border border-neutral-200 rounded-md px-2 py-1.5 focus:outline-none focus:border-blue-600"
             />
             <button
+              title="Envoyer le commentaire"
               type="submit"
               disabled={!newComment.trim()}
               className="bg-neutral-800 text-white px-2 py-1.5 rounded-md text-xs disabled:opacity-50"
@@ -206,7 +218,7 @@ const DraggableCard = memo(({
       handle=".drag-handle"
       cancel=".no-drag"
     >
-      <div ref={nodeRef} className="absolute">
+      <div ref={nodeRef} className="absolute" id={`card-${card.id}`}>
         {cardContent}
       </div>
     </Draggable>
@@ -395,6 +407,12 @@ export default function Project() {
 
     socket.on("project-updated", (data) => {
       setProject(prev => prev ? { ...prev, name: data.name, mode: data.mode } : prev);
+      addToast(`Le projet a été mis à jour`, "info");
+    });
+
+    socket.on("comment-added", (data) => {
+      const author = data.comment.name || data.comment.email || "Un utilisateur";
+      addToast(`Nouveau commentaire de ${author}`, "info");
     });
 
     socket.on("chat-message-received", (data) => {
@@ -411,41 +429,85 @@ export default function Project() {
   }, [id]);
 
   const handleExport = async () => {
-    const zip = new JSZip();
-    const mdFolder = zip.folder("markdown");
-    const pdfFolder = zip.folder("pdf");
+    try {
+      setShowExportModal(false);
+      addToast("Préparation de l'export...", "info");
 
-    cards.forEach((card, index) => {
-      const safeTitle = card.title.replace(/[^a-z0-9]/gi, '_').toLowerCase() || `card_${index}`;
+      const zip = new JSZip();
+      const mdFolder = zip.folder("markdown");
+      const pdfFolder = zip.folder("pdf_text");
 
-      // Add Markdown
-      mdFolder?.file(`${safeTitle}.md`, `# ${card.title}\n\n${card.content}`);
+      // Single Master PDF for all cards
+      const reportDoc = new jsPDF("p", "mm", "a4");
+      reportDoc.setFontSize(20);
+      reportDoc.text(`Projet: ${project?.name || 'Export'}`, 20, 20);
+      let masterYOffset = 35;
 
-      // Add PDF
-      const doc = new jsPDF();
-      doc.setFontSize(16);
-      doc.text(card.title, 10, 20);
-      doc.setFontSize(12);
+      for (let index = 0; index < cards.length; index++) {
+        const card = cards[index];
+        const safeTitle = card.title.replace(/[^a-z0-9]/gi, '_').toLowerCase() || `card_${index}`;
 
-      // Simple text wrapping for PDF
-      const splitText = doc.splitTextToSize(card.content || "", 180);
-      doc.text(splitText, 10, 30);
+        // Add Markdown
+        mdFolder?.file(`${safeTitle}.md`, `# ${card.title}\n\n${card.content}`);
 
-      const pdfOutput = doc.output("blob");
-      pdfFolder?.file(`${safeTitle}.pdf`, pdfOutput);
-    });
+        // Individual Simple Text PDF (fallback or standard)
+        const doc = new jsPDF();
+        doc.setFontSize(16);
+        doc.text(card.title, 10, 20);
+        doc.setFontSize(12);
+        const splitText = doc.splitTextToSize(card.content || "", 180);
+        doc.text(splitText, 10, 30);
+        const pdfOutput = doc.output("blob");
+        pdfFolder?.file(`${safeTitle}.pdf`, pdfOutput);
 
-    const content = await zip.generateAsync({ type: "blob" });
-    const url = window.URL.createObjectURL(content);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${project.name.replace(/[^a-z0-9]/gi, '_')}_export.zip`;
-    document.body.appendChild(a);
-    a.click();
-    window.URL.revokeObjectURL(url);
-    document.body.removeChild(a);
+        // Take snapshot for master PDF report
+        const element = document.getElementById(`card-${card.id}`);
+        if (element) {
+          try {
+            // Temporarily remove max-w if it restricts the capture
+            const originalMaxW = element.style.maxWidth;
+            element.style.maxWidth = "none";
+            // @ts-ignore
+            const canvas = await html2canvas(element, { scale: 2, useCORS: true, backgroundColor: "#ffffff" });
+            element.style.maxWidth = originalMaxW;
 
-    setShowExportModal(false);
+            const imgData = canvas.toDataURL("image/png");
+            
+            // A4 is 210 x 297 mm
+            const pdfWidth = 210 - 40; // 20mm margin on each side
+            const imgProps = reportDoc.getImageProperties(imgData);
+            const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+            
+            if (masterYOffset + pdfHeight > 297 - 20) {
+              reportDoc.addPage();
+              masterYOffset = 20;
+            }
+            
+            reportDoc.addImage(imgData, "PNG", 20, masterYOffset, pdfWidth, pdfHeight);
+            masterYOffset += pdfHeight + 15;
+          } catch (err) {
+            console.warn(`Could not snapshot card ${card.id}:`, err);
+          }
+        }
+      }
+
+      // Add Master Report to Zip
+      zip.file(`${project?.name.replace(/[^a-z0-9]/gi, '_') || 'project'}_Visual_Report.pdf`, reportDoc.output("blob"));
+
+      const content = await zip.generateAsync({ type: "blob" });
+      const url = window.URL.createObjectURL(content);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${project?.name.replace(/[^a-z0-9]/gi, '_') || 'project'}_export.zip`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      addToast("Exportation réussie !", "success");
+    } catch (error) {
+      console.error("Export fail", error);
+      addToast("Erreur lors de l'exportation", "error");
+    }
   };
 
   useEffect(() => {
@@ -533,6 +595,12 @@ export default function Project() {
       socketRef.current?.emit("card-move", { projectId: id, cardId: c.id, x: c.position_x, y: c.position_y });
     });
   };
+
+  const handleCommentAdded = useCallback((cardId: string, comment: any) => {
+    if (socketRef.current && id) {
+      socketRef.current.emit("comment-add", { projectId: id, cardId, comment });
+    }
+  }, [id]);
 
   const handleGeneratePitchDeck = async () => {
     setLoading(true);
@@ -1005,16 +1073,16 @@ export default function Project() {
       {/* Mobile Header */}
       <div className="md:hidden absolute top-0 left-0 right-0 h-14 bg-white border-b border-neutral-200 flex items-center justify-between px-4 z-50">
         <div className="flex items-center gap-2">
-          <button onClick={() => navigate('/')} className="p-2 -ml-2 text-neutral-500">
+          <button onClick={() => navigate('/')} title="Retour à l'accueil" className="p-2 -ml-2 text-neutral-500">
             <HomeIcon className="w-5 h-5" />
           </button>
           <span className="font-semibold text-neutral-800 truncate max-w-[150px]">{project.name}</span>
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={() => setIsChatOpen(!isChatOpen)} className="p-2 bg-neutral-100 rounded-lg text-neutral-600">
+          <button onClick={() => setIsChatOpen(!isChatOpen)} title="Ouvrir le chat" className="p-2 bg-neutral-100 rounded-lg text-neutral-600">
             {isChatOpen ? <X className="w-5 h-5" /> : <MessageSquare className="w-5 h-5" />}
           </button>
-          <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-2 bg-neutral-100 rounded-lg text-neutral-600">
+          <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} title="Menu" className="p-2 bg-neutral-100 rounded-lg text-neutral-600">
             {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
         </div>
@@ -1203,6 +1271,7 @@ export default function Project() {
                   <img src={image} alt="Preview" className="h-16 rounded-md border border-neutral-200" />
                   <button
                     onClick={() => setImage(null)}
+                    title="Supprimer l'image"
                     className="absolute -top-2 -right-2 bg-neutral-800 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs"
                   >
                     ×
@@ -1216,18 +1285,25 @@ export default function Project() {
               <div className="bg-white rounded-xl border border-neutral-200 flex items-center p-1.5 relative z-10 shadow-sm">
                 <button
                   onClick={() => fileInputRef.current?.click()}
+                  title="Ajouter une image"
                   className="p-2 text-neutral-500 hover:text-neutral-700 transition-colors"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48" /></svg>
                 </button>
+                <label htmlFor="file-upload" className="sr-only">Upload image</label>
                 <input
+                  id="file-upload"
                   type="file"
+                  title="Upload image"
                   accept="image/*"
                   className="hidden"
                   ref={fileInputRef}
                   onChange={handleImageUpload}
                 />
+                <label htmlFor="message-input" className="sr-only">Reply...</label>
                 <input
+                  id="message-input"
+                  title="Your message"
                   type="text"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
@@ -1386,13 +1462,11 @@ export default function Project() {
           onMouseUp={handleCanvasMouseUp}
           onMouseLeave={handleCanvasMouseLeave}
         >
-          <div style={{
-            transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
-            transformOrigin: '0 0',
-            width: '10000px',
-            height: '10000px',
-            transition: isPanning ? 'none' : 'transform 0.15s ease-out'
-          }}>
+          <div className={`transition-transform duration-150 ease-out w-[10000px] h-[10000px] origin-top-left ${isPanning ? 'transition-none' : ''}`}
+            style={{
+              transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
+            }}
+          >
             {cards.map(card => (
               <DraggableCard
                 key={card.id}
@@ -1402,6 +1476,7 @@ export default function Project() {
                 onDelete={handleCardDelete}
                 onUpdate={handleCardUpdate}
                 onSendToChat={handleSendToChat}
+                onCommentAdded={handleCommentAdded}
                 zoom={zoom}
               />
             ))}
@@ -1415,7 +1490,7 @@ export default function Project() {
 
           {user && (
             <div className="relative">
-              <button onClick={() => setShowAddMenu(!showAddMenu)} className="p-2 hover:bg-neutral-100 rounded-full text-neutral-500"><Plus className="w-4 h-4" /></button>
+              <button onClick={() => setShowAddMenu(!showAddMenu)} title="Ajouter" className="p-2 hover:bg-neutral-100 rounded-full text-neutral-500"><Plus className="w-4 h-4" /></button>
               {showAddMenu && (
                 <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-white rounded-lg shadow-lg border border-neutral-200 py-2 w-48 z-50">
                   <button onClick={() => { handleAddCard(); setShowAddMenu(false); }} className="w-full text-left px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-50">Nouvelle note</button>
