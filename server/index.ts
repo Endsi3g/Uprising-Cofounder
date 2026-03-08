@@ -1210,6 +1210,13 @@ const httpServer = createHttpServer(app);
   });
 
   // ═══════════════════════════════════════════
+  // Healthcheck Route
+  // ═══════════════════════════════════════════
+  app.get("/api/health", (_req, res) => {
+    res.status(200).json({ status: "ok", timestamp: new Date().toISOString() });
+  });
+
+  // ═══════════════════════════════════════════
   // Serve static files & Vite middleware
   // ═══════════════════════════════════════════
   if (IS_PROD) {
