@@ -34,9 +34,6 @@ RUN apt-get update && apt-get install -y \
     zstd \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Ollama
-RUN curl -fsSL https://ollama.com/install.sh | sh
-
 # Copy from builder
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./package.json
@@ -44,6 +41,9 @@ COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/scripts ./scripts
 COPY --from=builder /app/server ./server
 COPY --from=builder /app/src ./src
+
+# Install Ollama (Slow operation, moved to end so code changes don't bust cache)
+RUN curl -fsSL https://ollama.com/install.sh | sh
 
 # Expose ports
 EXPOSE 3000 11434
