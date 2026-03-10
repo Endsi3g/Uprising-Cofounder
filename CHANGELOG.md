@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0] - 2026-03-10
+
+### Added
+
+- **Premium Documentation**: Completely redesigned the documentation page with a modern, high-end aesthetic, utilizing Framer Motion for interactive transitions.
+- **Frontend-Only Launch Script**: Created `scripts/launch-frontend.ps1` and `dev:ui` NPM script to allow running the frontend independently with a built-in API proxy to the backend.
+
+### Improved
+
+- **UI Enhancements**: Globally hid scrollbars while maintaining full scrolling functionality and added smooth-scrolling behavior for a more premium experience.
+
+### Fixed
+
+- **Prisma Integration**: Resolved Prisma client export errors by restoring stable dependencies and forcing client re-generation.
+- **Automated Testing**: Fixed Playwright smoke tests to match the updated application title and branding.
+
 ## [2.1.1] - 2026-03-09
 
 ### Changed
