@@ -12,7 +12,7 @@ export default function Login() {
   const [mfaToken, setMfaToken] = useState('');
   const [userId, setUserId] = useState('');
   const navigate = useNavigate();
-  const { login, user } = useAuth();
+  const { login, skipLogin, user } = useAuth();
 
   useEffect(() => {
     if (user) {
@@ -24,16 +24,16 @@ export default function Login() {
     e.preventDefault();
     setError('');
     setLoading(true);
-    
+
     try {
       const res = await fetch(mfaRequired ? '/api/auth/login-mfa' : '/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(mfaRequired ? { userId, token: mfaToken } : { email, password })
       });
-      
+
       const data = await res.json();
-      
+
       if (!res.ok) throw new Error(data.error);
 
       if (data.mfa_required) {
@@ -41,7 +41,7 @@ export default function Login() {
         setUserId(data.userId);
         return;
       }
-      
+
       login(data.token, data.user);
       navigate('/');
     } catch (err: any) {
@@ -55,19 +55,19 @@ export default function Login() {
     <div className="min-h-screen bg-slate-50 flex items-center justify-center px-8">
       <div className="w-full max-w-md bg-white p-8 rounded-2xl shadow-sm border border-neutral-200">
         <h1 className="text-2xl font-semibold text-neutral-900 text-center mb-6">Bon retour</h1>
-        
+
         {error && <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-4 text-sm">{error}</div>}
-        
+
         <form onSubmit={handleSubmit} className="space-y-4">
           {!mfaRequired ? (
             <>
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-neutral-700 mb-1">Email</label>
-                <input 
+                <input
                   id="email"
                   title="Email"
                   placeholder="votre@email.com"
-                  type="email" 
+                  type="email"
                   required
                   value={email}
                   onChange={e => setEmail(e.target.value)}
@@ -76,11 +76,11 @@ export default function Login() {
               </div>
               <div>
                 <label htmlFor="password" className="block text-sm font-medium text-neutral-700 mb-1">Mot de passe</label>
-                <input 
+                <input
                   id="password"
                   title="Mot de passe"
                   placeholder="Votre mot de passe"
-                  type="password" 
+                  type="password"
                   required
                   value={password}
                   onChange={e => setPassword(e.target.value)}
@@ -91,7 +91,7 @@ export default function Login() {
           ) : (
             <div>
               <label htmlFor="mfaToken" className="block text-sm font-medium text-neutral-700 mb-1">Code d'authentification (MFA)</label>
-              <input 
+              <input
                 id="mfaToken"
                 title="Code d'authentification"
                 type="text"
@@ -103,7 +103,7 @@ export default function Login() {
               />
             </div>
           )}
-          <button 
+          <button
             type="submit"
             disabled={loading}
             className="w-full bg-blue-600 text-white rounded-lg py-2 font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
@@ -112,7 +112,22 @@ export default function Login() {
             {loading ? "Connexion..." : "Se connecter"}
           </button>
         </form>
-        
+
+        <div className="relative my-6">
+          <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-neutral-200" /></div>
+          <div className="relative flex justify-center text-xs uppercase"><span className="bg-white px-2 text-neutral-400">Ou accès rapide</span></div>
+        </div>
+
+        <button
+          onClick={() => {
+            skipLogin();
+            navigate('/');
+          }}
+          className="w-full border border-neutral-200 text-neutral-600 rounded-lg py-2 font-medium hover:bg-neutral-50 transition-colors flex items-center justify-center gap-2 mb-4"
+        >
+          Accès Développeur (Skip Login)
+        </button>
+
         <div className="mt-6 text-center text-sm text-neutral-500 space-y-2">
           <p>
             Pas encore de compte ? <Link to="/register" className="text-blue-600 hover:underline">S'inscrire</Link>

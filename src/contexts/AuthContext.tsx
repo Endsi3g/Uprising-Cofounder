@@ -32,6 +32,7 @@ interface AuthContextType {
   updateUser: (user: User) => void;
   checkAuth: () => Promise<void>;
   loading: boolean;
+  skipLogin: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -42,7 +43,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   const checkAuth = async () => {
-    if (token) {
+    if (token && token !== 'dev-mock-token') {
       try {
         const res = await fetch('/api/auth/me', {
           headers: { 'Authorization': `Bearer ${token}` }
@@ -80,8 +81,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(updatedUser);
   };
 
+  const skipLogin = () => {
+    const mockUser: User = {
+      id: 'dev-user-id',
+      email: 'dev@uprising.ca',
+      name: 'Agent de Développement',
+      role: 'admin',
+      onboarding_completed: 1,
+      notifications_enabled: 1,
+      theme: 'light',
+      default_mode: 'create',
+      credits: 999
+    };
+    const mockToken = 'dev-mock-token';
+    localStorage.setItem('token', mockToken);
+    setToken(mockToken);
+    setUser(mockUser);
+    setLoading(false);
+  };
+
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, updateUser, checkAuth, loading }}>
+    <AuthContext.Provider value={{ user, token, login, logout, updateUser, checkAuth, loading, skipLogin }}>
       {children}
     </AuthContext.Provider>
   );
