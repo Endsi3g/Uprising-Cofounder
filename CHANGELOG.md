@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.1] - 2026-03-10
+
+### Added
+
+- **Developer Skip Login**: Added an "Accès Développeur" button on the login page to bypass authentication during development and testing.
+
+### Fixed
+
+- **Frontend Loading Hang**: Resolved a critical issue where the application would hang on the loading screen if the backend was unresponsive or in the process of restarting.
+
 ## [2.2.0] - 2026-03-10
 
 ### Added
