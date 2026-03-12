@@ -303,7 +303,7 @@ const httpServer = createHttpServer(app);
     try {
       const validation = registerSchema.safeParse(req.body);
       if (!validation.success) {
-        return res.status(400).json({ error: validation.error.errors[0].message });
+        return res.status(400).json({ error: validation.error.issues[0].message });
       }
       const { email, password, referralCode } = validation.data;
 
@@ -360,7 +360,7 @@ const httpServer = createHttpServer(app);
     try {
       const validation = loginSchema.safeParse(req.body);
       if (!validation.success) {
-        return res.status(400).json({ error: validation.error.errors[0].message });
+        return res.status(400).json({ error: validation.error.issues[0].message });
       }
       const { email, password } = validation.data;
 
@@ -392,7 +392,7 @@ const httpServer = createHttpServer(app);
     try {
       const validation = mfaLoginSchema.safeParse(req.body);
       if (!validation.success) {
-        return res.status(400).json({ error: validation.error.errors[0].message });
+        return res.status(400).json({ error: validation.error.issues[0].message });
       }
       const { userId, token } = validation.data;
 
@@ -422,7 +422,7 @@ const httpServer = createHttpServer(app);
     try {
       const validation = tokenSchema.safeParse(req.body);
       if (!validation.success) {
-        return res.status(400).json({ error: validation.error.errors[0].message });
+        return res.status(400).json({ error: validation.error.issues[0].message });
       }
       const { token } = validation.data;
 
@@ -446,7 +446,7 @@ const httpServer = createHttpServer(app);
     try {
       const validation = emailSchema.safeParse(req.body);
       if (!validation.success) {
-        return res.status(400).json({ error: validation.error.errors[0].message });
+        return res.status(400).json({ error: validation.error.issues[0].message });
       }
       const { email } = validation.data;
 
@@ -487,7 +487,7 @@ const httpServer = createHttpServer(app);
     try {
       const validation = resetPasswordSchema.safeParse(req.body);
       if (!validation.success) {
-        return res.status(400).json({ error: validation.error.errors[0].message });
+        return res.status(400).json({ error: validation.error.issues[0].message });
       }
       const { token, newPassword } = validation.data;
 
@@ -537,7 +537,7 @@ const httpServer = createHttpServer(app);
     try {
       const validation = tokenSchema.safeParse(req.body);
       if (!validation.success) {
-        return res.status(400).json({ error: validation.error.errors[0].message });
+        return res.status(400).json({ error: validation.error.issues[0].message });
       }
       const { token } = validation.data;
       const user = await prisma.user.findUnique({ where: { id: (req as any).user.id }, select: { mfa_secret: true } });
@@ -574,7 +574,7 @@ const httpServer = createHttpServer(app);
   app.put("/api/users/onboarding", authenticateToken, async (req: any, res: any) => {
     const validation = onboardingSchema.safeParse(req.body);
     if (!validation.success) {
-      return res.status(400).json({ error: validation.error.errors[0].message });
+      return res.status(400).json({ error: validation.error.issues[0].message });
     }
     const { name, role, goal } = validation.data;
 
@@ -670,7 +670,7 @@ const httpServer = createHttpServer(app);
     try {
       const validation = projectSchema.safeParse(req.body);
       if (!validation.success) {
-        return res.status(400).json({ error: validation.error.errors[0].message });
+        return res.status(400).json({ error: validation.error.issues[0].message });
       }
       const { name, description, mode, is_private } = validation.data;
 
@@ -717,7 +717,7 @@ const httpServer = createHttpServer(app);
   app.put("/api/projects/:id", authenticateToken, async (req: any, res: any) => {
     const validation = projectUpdateSchema.safeParse(req.body);
     if (!validation.success) {
-      return res.status(400).json({ error: validation.error.errors[0].message });
+      return res.status(400).json({ error: validation.error.issues[0].message });
     }
     const { name, mode, is_private } = validation.data;
     const project = await prisma.project.findFirst({
@@ -819,7 +819,7 @@ const httpServer = createHttpServer(app);
 
     const validation = cardSchema.safeParse(req.body);
     if (!validation.success) {
-      return res.status(400).json({ error: validation.error.errors[0].message });
+      return res.status(400).json({ error: validation.error.issues[0].message });
     }
     const { title, content, position_x, position_y, phase } = validation.data;
     const id = uuidv4();
@@ -842,7 +842,7 @@ const httpServer = createHttpServer(app);
   app.put("/api/cards/:id", authenticateToken, async (req: any, res: any) => {
     const validation = cardUpdateSchema.safeParse(req.body);
     if (!validation.success) {
-      return res.status(400).json({ error: validation.error.errors[0].message });
+      return res.status(400).json({ error: validation.error.issues[0].message });
     }
     const { title, content } = validation.data;
     const card = await prisma.card.findFirst({ where: { id: req.params.id, deleted_at: null }});
