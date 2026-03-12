@@ -12,6 +12,8 @@ import helmet from "helmet";
 import compression from "compression";
 import rateLimit from "express-rate-limit";
 import path from "path";
+import cors from "cors";
+import { z } from "zod";
 import { triggerCall } from "./services/blandService.ts";
 import { sendSMS } from "./services/twilioService.ts";
 import { syncLead } from "./services/twentyService.ts";
@@ -108,8 +110,25 @@ const httpServer = createHttpServer(app);
 
   // ── Security middleware ──
   app.use(helmet({
-    contentSecurityPolicy: IS_PROD ? undefined : false,
+    contentSecurityPolicy: IS_PROD ? {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net"],
+        styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+        imgSrc: ["'self'", "data:", "https:", "http:"],
+        connectSrc: ["'self'", ...CORS_ORIGIN.split(',')],
+        fontSrc: ["'self'", "https://fonts.gstatic.com"],
+        objectSrc: ["'none'"],
+        mediaSrc: ["'self'"],
+        frameSrc: ["'none'"],
+      },
+    } : false,
     crossOriginEmbedderPolicy: false,
+  }));
+  app.use(cors({
+    origin: IS_PROD ? CORS_ORIGIN.split(',') : "*",
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"]
   }));
   app.use(compression());
 
@@ -213,21 +232,80 @@ const httpServer = createHttpServer(app);
   });
 
   // ═══════════════════════════════════════════
+  // Validation Schemas
+  // ═══════════════════════════════════════════
+  
+  const registerSchema = z.object({
+    email: z.string().email("Email invalide"),
+    password: z.string().min(8, "Le mot de passe doit contenir au moins 8 caractères"),
+    referralCode: z.string().optional()
+  });
+
+  const loginSchema = z.object({
+    email: z.string().email("Email invalide"),
+    password: z.string().min(1, "Mot de passe requis")
+  });
+
+  const mfaLoginSchema = z.object({
+    userId: z.string().uuid("ID utilisateur invalide"),
+    token: z.string().length(6, "Code MFA invalide")
+  });
+
+  const emailSchema = z.object({
+    email: z.string().email("Email invalide")
+  });
+
+  const tokenSchema = z.object({
+    token: z.string().min(1, "Token requis")
+  });
+
+  const resetPasswordSchema = z.object({
+    token: z.string().min(1, "Token requis"),
+    newPassword: z.string().min(8, "Le mot de passe doit contenir au moins 8 caractères")
+  });
+
+  const onboardingSchema = z.object({
+    name: z.string().min(1, "Le nom est requis"),
+    role: z.string().optional(),
+    goal: z.string().optional()
+  });
+
+  const projectSchema = z.object({
+    name: z.string().min(1, "Le nom du projet est requis"),
+    description: z.string().optional(),
+    mode: z.string().optional(),
+    is_private: z.boolean().optional()
+  });
+
+  const projectUpdateSchema = z.object({
+    name: z.string().optional(),
+    mode: z.string().optional(),
+    is_private: z.boolean().optional()
+  });
+
+  const cardSchema = z.object({
+    title: z.string().min(1, "Titre requis"),
+    content: z.string().optional(),
+    position_x: z.number().optional(),
+    position_y: z.number().optional(),
+    phase: z.number().optional()
+  });
+
+  const cardUpdateSchema = z.object({
+    title: z.string().optional(),
+    content: z.string().optional()
+  });
+
+  // ═══════════════════════════════════════════
   // Auth Routes
   // ═══════════════════════════════════════════
   app.post("/api/auth/register", authLimiter, async (req, res) => {
     try {
-      const { email, password, referralCode } = req.body;
-      
-      if (!email || !password) {
-        return res.status(400).json({ error: "Email et mot de passe requis" });
+      const validation = registerSchema.safeParse(req.body);
+      if (!validation.success) {
+        return res.status(400).json({ error: validation.error.errors[0].message });
       }
-      if (!validateEmail(email)) {
-        return res.status(400).json({ error: "Email invalide" });
-      }
-      if (password.length < 8) {
-        return res.status(400).json({ error: "Le mot de passe doit contenir au moins 8 caractères" });
-      }
+      const { email, password, referralCode } = validation.data;
 
       const existingUser = await prisma.user.findUnique({ where: { email } });
       if (existingUser) {
@@ -280,11 +358,11 @@ const httpServer = createHttpServer(app);
 
   app.post("/api/auth/login", authLimiter, async (req, res) => {
     try {
-      const { email, password } = req.body;
-
-      if (!email || !password) {
-        return res.status(400).json({ error: "Email et mot de passe requis" });
+      const validation = loginSchema.safeParse(req.body);
+      if (!validation.success) {
+        return res.status(400).json({ error: validation.error.errors[0].message });
       }
+      const { email, password } = validation.data;
 
       const user = await prisma.user.findUnique({ where: { email } });
       
@@ -312,8 +390,11 @@ const httpServer = createHttpServer(app);
 
   app.post("/api/auth/login-mfa", authLimiter, async (req, res) => {
     try {
-      const { userId, token } = req.body;
-      if (!userId || !token) return res.status(400).json({ error: "Paramètres manquants" });
+      const validation = mfaLoginSchema.safeParse(req.body);
+      if (!validation.success) {
+        return res.status(400).json({ error: validation.error.errors[0].message });
+      }
+      const { userId, token } = validation.data;
 
       const user = await prisma.user.findUnique({ where: { id: userId } });
       if (!user) return res.status(400).json({ error: "User not found" });
@@ -339,8 +420,11 @@ const httpServer = createHttpServer(app);
 
   app.post("/api/auth/verify-email", authLimiter, async (req, res) => {
     try {
-      const { token } = req.body;
-      if (!token) return res.status(400).json({ error: "Token manquant" });
+      const validation = tokenSchema.safeParse(req.body);
+      if (!validation.success) {
+        return res.status(400).json({ error: validation.error.errors[0].message });
+      }
+      const { token } = validation.data;
 
       const user = await prisma.user.findFirst({ where: { verification_token: token } });
       if (!user) return res.status(400).json({ error: "Jeton invalide ou expiré (Invalid token)" });
@@ -360,8 +444,11 @@ const httpServer = createHttpServer(app);
 
   app.post("/api/auth/forgot-password", authLimiter, async (req, res) => {
     try {
-      const { email } = req.body;
-      if (!email) return res.status(400).json({ error: "Email requis" });
+      const validation = emailSchema.safeParse(req.body);
+      if (!validation.success) {
+        return res.status(400).json({ error: validation.error.errors[0].message });
+      }
+      const { email } = validation.data;
 
       const user = await prisma.user.findFirst({
         where: { email: { equals: email, mode: 'insensitive' } }
@@ -398,14 +485,11 @@ const httpServer = createHttpServer(app);
 
   app.post("/api/auth/reset-password", authLimiter, async (req, res) => {
     try {
-      const { token, newPassword } = req.body;
-
-      if (!token || !newPassword) {
-        return res.status(400).json({ error: "Token et nouveau mot de passe requis" });
+      const validation = resetPasswordSchema.safeParse(req.body);
+      if (!validation.success) {
+        return res.status(400).json({ error: validation.error.errors[0].message });
       }
-      if (newPassword.length < 8) {
-        return res.status(400).json({ error: "Le mot de passe doit contenir au moins 8 caractères" });
-      }
+      const { token, newPassword } = validation.data;
 
       const user = await prisma.user.findFirst({ where: { reset_token: token } });
       
@@ -451,7 +535,11 @@ const httpServer = createHttpServer(app);
 
   app.post("/api/auth/mfa/verify-setup", authenticateToken, async (req, res) => {
     try {
-      const { token } = req.body;
+      const validation = tokenSchema.safeParse(req.body);
+      if (!validation.success) {
+        return res.status(400).json({ error: validation.error.errors[0].message });
+      }
+      const { token } = validation.data;
       const user = await prisma.user.findUnique({ where: { id: (req as any).user.id }, select: { mfa_secret: true } });
       
       if (!user?.mfa_secret) return res.status(400).json({ error: "MFA n'a pas été initié" });
@@ -484,11 +572,11 @@ const httpServer = createHttpServer(app);
   });
 
   app.put("/api/users/onboarding", authenticateToken, async (req: any, res: any) => {
-    const { name, role, goal } = req.body;
-
-    if (!name || name.trim().length === 0) {
-      return res.status(400).json({ error: "Le nom est requis" });
+    const validation = onboardingSchema.safeParse(req.body);
+    if (!validation.success) {
+      return res.status(400).json({ error: validation.error.errors[0].message });
     }
+    const { name, role, goal } = validation.data;
 
     await prisma.user.update({
       where: { id: req.user.id },
@@ -580,11 +668,11 @@ const httpServer = createHttpServer(app);
 
   app.post("/api/projects", authenticateToken, async (req: any, res: any) => {
     try {
-      const { name, description, mode, is_private } = req.body;
-
-      if (!name || name.trim().length === 0) {
-        return res.status(400).json({ error: "Le nom du projet est requis" });
+      const validation = projectSchema.safeParse(req.body);
+      if (!validation.success) {
+        return res.status(400).json({ error: validation.error.errors[0].message });
       }
+      const { name, description, mode, is_private } = validation.data;
 
       const id = uuidv4();
       const project = await prisma.project.create({
@@ -627,7 +715,11 @@ const httpServer = createHttpServer(app);
   });
 
   app.put("/api/projects/:id", authenticateToken, async (req: any, res: any) => {
-    const { name, mode, is_private } = req.body;
+    const validation = projectUpdateSchema.safeParse(req.body);
+    if (!validation.success) {
+      return res.status(400).json({ error: validation.error.errors[0].message });
+    }
+    const { name, mode, is_private } = validation.data;
     const project = await prisma.project.findFirst({
         where: { id: req.params.id, deleted_at: null },
         include: { members: true }
@@ -725,7 +817,11 @@ const httpServer = createHttpServer(app);
     const hasAccess = project.user_id === req.user.id || (member && (member.role === 'owner' || member.role === 'editor')) || !project.is_private;
     if (!hasAccess) return res.status(403).json({ error: "Access denied" });
 
-    const { title, content, position_x, position_y, phase } = req.body;
+    const validation = cardSchema.safeParse(req.body);
+    if (!validation.success) {
+      return res.status(400).json({ error: validation.error.errors[0].message });
+    }
+    const { title, content, position_x, position_y, phase } = validation.data;
     const id = uuidv4();
     
     const card = await prisma.card.create({
@@ -744,7 +840,11 @@ const httpServer = createHttpServer(app);
   });
 
   app.put("/api/cards/:id", authenticateToken, async (req: any, res: any) => {
-    const { title, content } = req.body;
+    const validation = cardUpdateSchema.safeParse(req.body);
+    if (!validation.success) {
+      return res.status(400).json({ error: validation.error.errors[0].message });
+    }
+    const { title, content } = validation.data;
     const card = await prisma.card.findFirst({ where: { id: req.params.id, deleted_at: null }});
     if (!card) return res.status(404).json({ error: "Card not found" });
     
