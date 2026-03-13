@@ -1,0 +1,98 @@
+# Render.com Blueprint — Uprising Cofounder
+# Base de données → Supabase (externe) | LLM → Cloud provider | Queue → Upstash Redis
+# Docs: https://render.com/docs/blueprint-spec
+
+services:
+  # ── Backend (Web Service) ──────────────────────────────────────
+  - type: web
+    name: uprising-backend
+    runtime: docker
+    dockerfilePath: ./Dockerfile.render
+    plan: starter
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+
+      # ── Database (Supabase externe — configurer dans le dashboard) ──
+      - key: DATABASE_URL
+        sync: false  # Ex: postgresql://postgres:[PWD]@db.xxx.supabase.co:5432/postgres
+
+      - key: JWT_SECRET
+        generateValue: true
+
+      # ── LLM Provider ───────────────────────────────────────────
+      - key: LLM_PROVIDER
+        value: gemini
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: OPENROUTER_BASE_URL
+        value: https://openrouter.ai/api/v1
+      - key: OPENROUTER_MODEL
+        value: mistralai/mixtral-8x7b-instruct
+
+      # ── Upstash Redis (BullMQ) ─────────────────────────────────
+      - key: UPSTASH_REDIS_URL
+        sync: false  # Ex: rediss://default:TOKEN@xxx.upstash.io:6380
+
+      # ── PostHog Analytics ─────────────────────────────────────
+      - key: POSTHOG_API_KEY
+        sync: false
+      - key: POSTHOG_HOST
+        value: https://app.posthog.com
+
+      # ── SMTP (emails transactionnels) ──────────────────────────
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        value: '587'
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: SMTP_FROM
+        value: '"Uprising Studio" <noreply@uprisingstudio.ca>'
+
+      # ── Services optionnels ────────────────────────────────────
+      - key: BLAND_API_KEY
+        sync: false
+      - key: ELEVENLABS_API_KEY
+        sync: false
+      - key: TWILIO_ACCOUNT_SID
+        sync: false
+      - key: TWILIO_AUTH_TOKEN
+        sync: false
+      - key: TWILIO_PHONE_NUMBER
+        sync: false
+      - key: TWENTY_API_KEY
+        sync: false
+      - key: TWENTY_API_URL
+        value: https://api.twenty.com
+
+  # ── Frontend (Static Site → Vercel recommandé) ─────────────────
+  # Note: Déployer le frontend sur Vercel pour un CDN global.
+  # Ce service est conservé comme fallback Render uniquement.
+  - type: web
+    name: uprising-frontend
+    runtime: static
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    autoDeploy: true
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: VITE_API_URL
+        value: https://uprising-backend.onrender.com
+      - key: VITE_POSTHOG_KEY
+        sync: false
+      - key: VITE_POSTHOG_HOST
+        value: https://app.posthog.com

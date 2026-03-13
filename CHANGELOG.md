@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.0] - 2026-03-12
+
+### Added
+
+- **Multi-Provider LLM Support**: Added `LLM_PROVIDER` env var supporting `gemini`, `groq`, `openrouter`, and `local` (Ollama). Deploy with any cloud LLM provider without modifying code.
+- **Interactive Deploy Script**: `deploy.ps1` now features a full interactive menu (Local Docker + Ollama / Groq / OpenRouter / Render.com).
+- **Render.com Deployment**: Added `render.yaml` Blueprint for one-click cloud deployment (backend + static frontend + managed Postgres) and `Dockerfile.render` (lean image without Ollama).
+- **BullMQ + Upstash Redis Message Queue**: Asynchronous job processing via `queueService.ts` with dedicated email and report workers.
+- **PostHog Product Analytics**: Full `posthog-js` (client) + `posthog-node` (server) integration for pageview tracking and feature analytics.
+- **Vercel Deployment**: Added `vercel.json` for zero-config Vercel frontend deployment with `/api` proxy to Render backend.
+- **Supabase Database Integration**: `DATABASE_URL` now supports external Supabase PostgreSQL as primary database.
+
+### Changed
+
+- **Docker Entrypoint**: Ollama now only starts when `LLM_PROVIDER=local`, reducing startup time by ~60% for cloud LLM modes.
+- **docker-compose.yml**: Full env var passthrough for all LLM providers and optional services.
+- **`.env.example`**: Expanded with all new service variables (Supabase, Upstash, PostHog, Groq, OpenRouter).
+
+---
+
 ## [2.2.1] - 2026-03-10
 
 ### Added
