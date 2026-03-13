@@ -7,6 +7,18 @@ export default function SettingsModal({ isOpen, onClose }: { isOpen: boolean, on
   const [notifications, setNotifications] = useState(true);
   const [theme, setTheme] = useState('light');
   const [defaultMode, setDefaultMode] = useState('create');
+  
+  // API Keys state
+  const [apiKeys, setApiKeys] = useState({
+    gemini_api_key: '',
+    bland_api_key: '',
+    elevenlabs_api_key: '',
+    twenty_api_key: '',
+    twilio_account_sid: '',
+    twilio_auth_token: '',
+    twilio_phone_number: ''
+  });
+
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -14,6 +26,16 @@ export default function SettingsModal({ isOpen, onClose }: { isOpen: boolean, on
       setNotifications(user.notifications_enabled === 1);
       setTheme(user.theme || 'light');
       setDefaultMode(user.default_mode || 'create');
+      
+      setApiKeys({
+        gemini_api_key: user.gemini_api_key || '',
+        bland_api_key: user.bland_api_key || '',
+        elevenlabs_api_key: user.elevenlabs_api_key || '',
+        twenty_api_key: user.twenty_api_key || '',
+        twilio_account_sid: user.twilio_account_sid || '',
+        twilio_auth_token: user.twilio_auth_token || '',
+        twilio_phone_number: user.twilio_phone_number || ''
+      });
     }
   }, [user]);
 
@@ -31,7 +53,8 @@ export default function SettingsModal({ isOpen, onClose }: { isOpen: boolean, on
         body: JSON.stringify({ 
           notifications_enabled: notifications, 
           theme, 
-          default_mode: defaultMode 
+          default_mode: defaultMode,
+          ...apiKeys
         })
       });
       
@@ -110,6 +133,37 @@ export default function SettingsModal({ isOpen, onClose }: { isOpen: boolean, on
               >
                 🚀 Scaler
               </button>
+            </div>
+          </div>
+
+          <hr className="border-neutral-100" />
+          
+          {/* API Keys */}
+          <div>
+            <h3 className="text-sm font-medium text-neutral-900 mb-3">Clés d'API & Intégrations</h3>
+            <p className="text-xs text-neutral-500 mb-4">Ces clés seront utilisées par votre assistant IA pour les automatisations et générations. Elles sont stockées de manière sécurisée.</p>
+            
+            <div className="space-y-4 max-h-60 overflow-y-auto pr-2">
+              {[
+                { id: 'gemini_api_key', label: 'Google Gemini API Key', placeholder: 'AIzaSy...' },
+                { id: 'bland_api_key', label: 'Bland AI API Key', placeholder: 'sk-...' },
+                { id: 'elevenlabs_api_key', label: 'ElevenLabs API Key', placeholder: 'sk_...' },
+                { id: 'twenty_api_key', label: 'Twenty CRM API Key', placeholder: '...' },
+                { id: 'twilio_account_sid', label: 'Twilio Account SID', placeholder: 'AC...' },
+                { id: 'twilio_auth_token', label: 'Twilio Auth Token', placeholder: '...' },
+                { id: 'twilio_phone_number', label: 'Twilio Phone Number', placeholder: '+1234567890' }
+              ].map(field => (
+                <div key={field.id}>
+                  <label className="block text-xs font-medium text-neutral-700 mb-1">{field.label}</label>
+                  <input
+                    type="password"
+                    placeholder={field.placeholder}
+                    value={apiKeys[field.id as keyof typeof apiKeys]}
+                    onChange={e => setApiKeys({...apiKeys, [field.id]: e.target.value})}
+                    className="w-full border border-neutral-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#E8794A] focus:border-transparent"
+                  />
+                </div>
+              ))}
             </div>
           </div>
         </div>

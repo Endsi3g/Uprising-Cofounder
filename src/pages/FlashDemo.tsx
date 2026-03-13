@@ -42,25 +42,8 @@ export default function FlashDemo() {
             token = data.token;
             user = data.user;
         }
-
-        // Manually set auth state (hacky but works if AuthContext exposes setToken/setUser, 
-        // but here we might need to just use the login function if it accepts token, 
-        // or just rely on the fact that we have the token and can reload or use the context's login method if it supports it.
-        // Looking at AuthContext usually it takes email/pass. 
-        // Let's use the login method from useAuth if it does the API call, but we already did it.
-        // We need to store the token in localStorage so AuthContext picks it up on mount/update.
         
         localStorage.setItem('token', token);
-        // We force a reload to pick up the auth state or we need to update the context.
-        // Since we can't easily access the context setter from here without modifying AuthContext, 
-        // a full reload or redirecting to a route that checks auth is best. 
-        // But wait, we are already in the app.
-        
-        // Let's try to use the `login` function from context if it supports passing data, 
-        // but usually it takes credentials.
-        // We will just reload the page to /project/new-demo
-        
-        // Actually, we can just call the create project API with the token we have.
         
         setStatus('Création du projet Audit...');
         const projRes = await fetch('/api/projects', {
@@ -70,9 +53,9 @@ export default function FlashDemo() {
                 'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify({ 
-                name: "Audit Flash - Salon", 
-                description: "Audit de croissance en direct",
-                mode: "scale" // or create
+                name: "Business Plan (Généré par IA)", 
+                description: "Plan de lancement complet",
+                mode: "create"
             })
         });
         
@@ -83,7 +66,9 @@ export default function FlashDemo() {
         
         const project = await projRes.json();
         
-        // Send initial message to trigger the "Audit" persona
+        setStatus('Génération du plan de business complet...');
+
+        // Send initial message to trigger the creation of a full business plan
         await fetch(`/api/projects/${project.id}/messages`, {
             method: 'POST',
             headers: { 
@@ -92,13 +77,11 @@ export default function FlashDemo() {
             },
             body: JSON.stringify({
                 role: 'user',
-                content: "Je suis au salon, fais-moi une démo flash. Audite mon business (je vais te le décrire). Commence par me demander ce que je fais."
+                content: "Génère un plan de business complet étape par étape pour une nouvelle startup Tech, et crée immédiatement les cartes correspondantes dans le canvas pour les phases 1 (Idéation), 2 (Produit), 3 (Marketing) et 4 (GTM)."
             })
         });
 
         // Redirect to project
-        // We need to ensure the app knows we are logged in.
-        // Writing to localStorage and reloading to the project URL is the safest bet for the AuthContext to pick it up.
         window.location.href = `/project/${project.id}?demo=true`;
 
       } catch (error) {

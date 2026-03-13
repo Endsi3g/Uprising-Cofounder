@@ -606,7 +606,8 @@ const httpServer = createHttpServer(app);
       twilio_auth_token,
       twilio_phone_number,
       elevenlabs_api_key,
-      twenty_api_key
+      twenty_api_key,
+      gemini_api_key
     } = req.body;
 
     await prisma.user.update({
@@ -621,6 +622,7 @@ const httpServer = createHttpServer(app);
         twilio_phone_number,
         elevenlabs_api_key,
         twenty_api_key,
+        gemini_api_key
       }
     });
     
@@ -1173,11 +1175,14 @@ const httpServer = createHttpServer(app);
         return res.status(400).json({ error: "Messages array required" });
       }
 
+      const user = await prisma.user.findUnique({ where: { id: req.user.id } });
+      const userApiKey = user?.gemini_api_key || undefined;
+
       res.setHeader('Content-Type', 'text/event-stream');
       res.setHeader('Cache-Control', 'no-cache');
       res.setHeader('Connection', 'keep-alive');
 
-      const stream = await chatWithCofounder(messages, projectContext || {});
+      const stream = await chatWithCofounder(messages, projectContext || {}, userApiKey);
       
       for await (const chunk of stream) {
         const text = chunk.text;
@@ -1201,7 +1206,8 @@ const httpServer = createHttpServer(app);
   app.post("/api/ai/pitch-deck", authenticateToken, aiLimiter, async (req: any, res: any) => {
     try {
       const { projectContext } = req.body;
-      const result = await generatePitchDeck(projectContext);
+      const user = await prisma.user.findUnique({ where: { id: req.user.id } });
+      const result = await generatePitchDeck(projectContext, user?.gemini_api_key || undefined);
       res.json({ content: result });
     } catch (error) {
       console.error("Pitch deck error:", error);
@@ -1212,7 +1218,8 @@ const httpServer = createHttpServer(app);
   app.post("/api/ai/market-analysis", authenticateToken, aiLimiter, async (req: any, res: any) => {
     try {
       const { projectContext } = req.body;
-      const result = await generateMarketAnalysis(projectContext);
+      const user = await prisma.user.findUnique({ where: { id: req.user.id } });
+      const result = await generateMarketAnalysis(projectContext, user?.gemini_api_key || undefined);
       res.json({ content: result });
     } catch (error) {
       console.error("Market analysis error:", error);
@@ -1223,7 +1230,8 @@ const httpServer = createHttpServer(app);
   app.post("/api/ai/financial-model", authenticateToken, aiLimiter, async (req: any, res: any) => {
     try {
       const { projectContext } = req.body;
-      const result = await generateFinancialModel(projectContext);
+      const user = await prisma.user.findUnique({ where: { id: req.user.id } });
+      const result = await generateFinancialModel(projectContext, user?.gemini_api_key || undefined);
       res.json({ content: result });
     } catch (error) {
       console.error("Financial model error:", error);
@@ -1235,7 +1243,8 @@ const httpServer = createHttpServer(app);
     try {
       const { idea } = req.body;
       if (!idea) return res.status(400).json({ error: "L'idée est requise" });
-      const result = await analyzeIdea(idea);
+      const user = await prisma.user.findUnique({ where: { id: req.user.id } });
+      const result = await analyzeIdea(idea, user?.gemini_api_key || undefined);
       res.json(result);
     } catch (error) {
       console.error("Analyze idea error:", error);
@@ -1246,7 +1255,8 @@ const httpServer = createHttpServer(app);
   app.post("/api/ai/generate-ideas", authenticateToken, aiLimiter, async (req: any, res: any) => {
     try {
       const { interests, businessType } = req.body;
-      const result = await generateIdeas(interests, businessType);
+      const user = await prisma.user.findUnique({ where: { id: req.user.id } });
+      const result = await generateIdeas(interests, businessType, user?.gemini_api_key || undefined);
       res.json(result);
     } catch (error) {
       console.error("Generate ideas error:", error);

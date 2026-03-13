@@ -3,16 +3,16 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-function getAI() {
-    const apiKey = process.env.GEMINI_API_KEY;
+function getAI(userApiKey?: string) {
+    const apiKey = userApiKey || process.env.GEMINI_API_KEY;
     if (!apiKey) {
-        throw new Error("GEMINI_API_KEY is not set in environment variables.");
+        throw new Error("GEMINI_API_KEY is not set in environment variables or user settings.");
     }
     return new GoogleGenAI({ apiKey });
 }
 
-export async function generatePitchDeck(projectContext: any) {
-    const ai = getAI();
+export async function generatePitchDeck(projectContext: any, userApiKey?: string) {
+    const ai = getAI(userApiKey);
     const prompt = `Tu es un expert en création de Pitch Deck pour startups.
   À partir du contexte du projet suivant (cartes du canvas), génère un Pitch Deck complet en format Markdown.
   Prends en compte le marché canadien, les spécificités locales et utilise la devise CAD ($).
@@ -41,8 +41,8 @@ export async function generatePitchDeck(projectContext: any) {
     return response.text || "Erreur lors de la génération du Pitch Deck.";
 }
 
-export async function generateMarketAnalysis(projectContext: any) {
-    const ai = getAI();
+export async function generateMarketAnalysis(projectContext: any, userApiKey?: string) {
+    const ai = getAI(userApiKey);
     const prompt = `Tu es un expert en analyse de marché et stratégie d'entreprise.
   À partir du contexte du projet suivant (cartes du canvas), génère une analyse de marché complète en format Markdown.
   L'analyse doit inclure :
@@ -70,8 +70,8 @@ export async function generateMarketAnalysis(projectContext: any) {
     return response.text || "Erreur lors de la génération de l'analyse de marché.";
 }
 
-export async function generateFinancialModel(projectContext: any) {
-    const ai = getAI();
+export async function generateFinancialModel(projectContext: any, userApiKey?: string) {
+    const ai = getAI(userApiKey);
     const prompt = `Tu es un directeur financier (CFO) expert en modélisation financière pour les startups.
   À partir du contexte du projet suivant (cartes du canvas), génère un modèle financier simplifié sur 3 ans en format Markdown.
   Le modèle doit inclure :
@@ -99,8 +99,8 @@ export async function generateFinancialModel(projectContext: any) {
     return response.text || "Erreur lors de la génération du modèle financier.";
 }
 
-export async function analyzeIdea(idea: string) {
-    const ai = getAI();
+export async function analyzeIdea(idea: string, userApiKey?: string) {
+    const ai = getAI(userApiKey);
     const system = `Tu es un analyste stratégique pour Uprising Cofounder. 
 Tu analyses des données de marché réelles pour valider ou challenger des idées business.
 
@@ -144,8 +144,8 @@ Analyse et réponds en JSON strict avec la structure suivante :
     }
 }
 
-export async function generateIdeas(interests?: string, businessType: 'startup' | 'traditional' = 'startup') {
-    const ai = getAI();
+export async function generateIdeas(interests?: string, businessType: 'startup' | 'traditional' = 'startup', userApiKey?: string) {
+    const ai = getAI(userApiKey);
     const typeText = businessType === 'startup'
         ? "startup innovantes et technologiques (SaaS, App, IA, plateforme, etc.)"
         : "entreprises traditionnelles ou physiques (agence, commerce local, service, artisanat, consulting, etc.)";
@@ -177,8 +177,8 @@ export async function generateIdeas(interests?: string, businessType: 'startup' 
     }
 }
 
-export async function chatWithCofounder(messages: { role: string; content: string; image?: string }[], projectContext: any) {
-    const ai = getAI();
+export async function chatWithCofounder(messages: { role: string; content: string; image?: string }[], projectContext: any, userApiKey?: string) {
+    const ai = getAI(userApiKey);
 
     // Extract URLs from messages to provide context
     const urls: string[] = [];

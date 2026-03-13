@@ -63,7 +63,7 @@ export function startEmailWorker(): Worker<EmailJobData> | null {
   });
 
   const worker = new Worker<EmailJobData>(QUEUE_NAME, processEmailJob, {
-    connection,
+    connection: connection as any,
     concurrency: 5, // Traite jusqu'à 5 emails simultanément
   });
 

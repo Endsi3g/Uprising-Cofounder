@@ -67,7 +67,7 @@ export function startReportWorker(): Worker<ReportJobData> | null {
   });
 
   const worker = new Worker<ReportJobData>(QUEUE_NAME, processReportJob, {
-    connection,
+    connection: connection as any,
     concurrency: 2, // Rapports lourds: limiter la concurrence
     limiter: {
       max: 10,

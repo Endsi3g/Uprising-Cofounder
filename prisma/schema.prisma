@@ -27,6 +27,7 @@ model User {
   twilio_phone_number   String?
   elevenlabs_api_key    String?
   twenty_api_key        String?
+  gemini_api_key        String?
   credits               Int       @default(100)
   referral_code         String?
   referred_by           String?
