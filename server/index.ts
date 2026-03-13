@@ -1,3 +1,5 @@
+import { startEmailWorker } from "./services/workers/emailWorker.ts";
+import { startReportWorker } from "./services/workers/reportWorker.ts";
 import express from "express";
 import * as Sentry from "@sentry/node";
 import { nodeProfilingIntegration } from "@sentry/profiling-node";
@@ -1337,9 +1339,12 @@ const httpServer = createHttpServer(app);
     app.use(vite.middlewares);
   }
 
+  startEmailWorker();
+  startReportWorker();
   httpServer.listen(PORT, "0.0.0.0", () => {
     console.log(`Server running on http://localhost:${PORT} [${IS_PROD ? 'PRODUCTION' : 'DEVELOPMENT'}]`);
   });
 }
 
 startServer();
+

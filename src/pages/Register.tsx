@@ -52,7 +52,7 @@ export default function Register() {
           <div>
             <label className="block text-sm font-medium text-neutral-700 mb-1">Email</label>
             <input 
-              type="email" 
+              type="email" autoComplete="email" 
               required
               value={email}
               onChange={e => setEmail(e.target.value)}
@@ -62,7 +62,7 @@ export default function Register() {
           <div>
             <label className="block text-sm font-medium text-neutral-700 mb-1">Mot de passe</label>
             <input 
-              type="password" 
+              type="password" autoComplete="new-password" 
               required
               value={password}
               onChange={e => setPassword(e.target.value)}
@@ -88,3 +88,4 @@ export default function Register() {
     </div>
   );
 }
+
