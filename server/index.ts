@@ -3,7 +3,7 @@ import { startReportWorker } from "./services/workers/reportWorker.ts";
 import express from "express";
 import * as Sentry from "@sentry/node";
 import { nodeProfilingIntegration } from "@sentry/profiling-node";
-import { createServer as createViteServer } from "vite";
+// vite dynamically imported
 import { createServer as createHttpServer } from "http";
 import { Server } from "socket.io";
 import { PrismaClient } from "@prisma/client";
@@ -85,9 +85,8 @@ const optionalAuthenticateToken = (req: any, res: any, next: any) => {
 const validateEmail = (email: string): boolean => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 const sanitize = (str: string): string => str.replace(/[<>]/g, '').trim();
 
-async function startServer() {
 // ── Express App ──
-const app = express();
+export const app = express();
 
 // Ensure to call this before importing any other modules!
 Sentry.init({
@@ -1331,7 +1330,11 @@ const httpServer = createHttpServer(app);
     app.get("*", (_req, res) => {
       res.sendFile(path.join(import.meta.dirname, "dist", "index.html"));
     });
-  } else {
+  }
+
+async function startServer() {
+  if (!IS_PROD) {
+    const { createServer: createViteServer } = await import("vite");
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: "spa",
@@ -1346,5 +1349,7 @@ const httpServer = createHttpServer(app);
   });
 }
 
-startServer();
+if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+  startServer();
+}
 
